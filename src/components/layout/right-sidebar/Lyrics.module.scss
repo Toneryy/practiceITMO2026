@@ -1,0 +1,36 @@
+.lyrics {
+	> div {
+		font-weight: 500;
+		margin: 1.25rem 0;
+
+		color: var(--color-primary);
+	}
+
+	> button {
+		opacity: 0.65;
+		margin-bottom: 0.3rem;
+		transition: opacity 0.3s ease-in-out;
+		text-align: left;
+
+		&:hover {
+			opacity: 1;
+		}
+
+		&.active {
+			opacity: 1;
+			font-weight: 500;
+		}
+
+		> p {
+			position: relative;
+			line-height: 2;
+
+			.icon {
+				position: absolute;
+				left: -1rem;
+				top: 0.7rem;
+				color: var(--color-primary);
+			}
+		}
+	}
+}
