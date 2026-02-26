@@ -1,0 +1,43 @@
+{
+  "name": "stream-spotify-clone",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.1.13",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.18",
+    "jsmediatags": "^3.9.7",
+    "lucide-react": "^0.543.0",
+    "mobx": "^6.13.7",
+    "mobx-react-lite": "^4.1.0",
+    "mobx-react-observer": "^1.1.0",
+    "nuqs": "^2.6.0",
+    "react": "^19.1.1",
+    "react-circular-progressbar": "^2.2.0",
+    "react-dom": "^19.1.1",
+    "sass": "^1.92.1",
+    "tailwindcss": "^4.1.13"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "@types/jsmediatags": "^3.9.6",
+    "@types/node": "^24.3.1",
+    "@types/react": "^19.1.10",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^5.0.0",
+    "eslint": "^9.33.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.3.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "vite": "^7.1.2"
+  }
+}
