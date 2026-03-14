@@ -1,8 +1,10 @@
 import { ExplicitBadge } from '@/components/ui/explicit-badge/ExplicitBadge'
+import { PagesConfig } from '@/config/pages.config'
 import { playerStore } from '@/store/player.store'
 import type { ITrack } from '@/types/track.types'
 import { Pause, Play } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { Link } from 'react-router-dom'
 
 import cn from 'clsx'
 
@@ -13,6 +15,10 @@ interface Props {
 	image: string
 	title: string
 	subTitle: string
+	/** If provided, the subtitle becomes a clickable link to the artist page */
+	artistName?: string
+	/** If provided, the title becomes a clickable link to the album page */
+	albumName?: string
 	explicit?: boolean
 	track?: ITrack
 	trackList?: ITrack[]
@@ -21,6 +27,8 @@ interface Props {
 export const TrackInfo = observer(function TrackInfo({
 	title,
 	subTitle,
+	artistName,
+	albumName,
 	image,
 	explicit,
 	track,
@@ -96,18 +104,22 @@ export const TrackInfo = observer(function TrackInfo({
 				/>
 			)}
 
-		<div>
+		<div className="min-w-0">
 			<div
 				className={cn(
 					'flex items-center gap-1.5 text-lg font-medium',
 					isActive ? 'text-primary' : 'text-white'
 				)}
 			>
-				{track ? (
-					<button
-						onClick={handleTitleClick}
+				{albumName ? (
+					<Link
+						to={PagesConfig.ALBUMS(encodeURIComponent(albumName))}
 						className="truncate hover:underline"
 					>
+						{title}
+					</Link>
+				) : track ? (
+					<button onClick={handleTitleClick} className="truncate hover:underline">
 						{title}
 					</button>
 				) : (
@@ -115,7 +127,16 @@ export const TrackInfo = observer(function TrackInfo({
 				)}
 				{explicit && <ExplicitBadge />}
 			</div>
-			<div>{subTitle}</div>
+			{artistName ? (
+				<Link
+					to={PagesConfig.ARTISTS(encodeURIComponent(artistName))}
+					className="truncate block text-sm text-white/60 hover:underline hover:text-white"
+				>
+					{subTitle}
+				</Link>
+			) : (
+				<div className="truncate text-sm text-white/60">{subTitle}</div>
+			)}
 		</div>
 		</div>
 	)

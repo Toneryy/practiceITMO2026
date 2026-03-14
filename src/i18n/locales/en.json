@@ -1,6 +1,7 @@
 {
   "nav": {
     "home": "Home",
+    "search": "Search",
     "discover": "Discover",
     "artists": "Artists",
     "likedSongs": "Liked Songs",
@@ -34,7 +35,17 @@
     "detailListeners": "Listeners"
   },
   "search": {
-    "placeholder": "Search for songs, artists, etc..."
+    "placeholder": "What do you want to listen to?",
+    "emptyTitle": "Find what you love",
+    "emptySubtitle": "Search for songs, artists, albums and more.",
+    "noResults": "No results for \"{{query}}\"",
+    "noResultsHint": "Check the spelling or try a different keyword.",
+    "topResult": "Top Result",
+    "songs": "Songs",
+    "allSongs": "More Songs",
+    "artists": "Artists",
+    "song": "Song",
+    "listeners": "listeners"
   },
   "sidebar": {
     "playlists": "Playlists",

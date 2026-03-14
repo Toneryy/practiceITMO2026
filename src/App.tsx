@@ -10,6 +10,7 @@ import { HomePage } from '@/pages/HomePage'
 import { LikedSongsPage } from '@/pages/LikedSongsPage'
 import { PlaylistPage } from '@/pages/PlaylistPage'
 import { RecentlyPlayedPage } from '@/pages/RecentlyPlayedPage'
+import { SearchPage } from '@/pages/SearchPage'
 import { catalogStore } from '@/store/catalog.store'
 import { favoriteStore } from '@/store/favorite.store'
 import { subscriptionStore } from '@/store/subscription.store'
@@ -47,10 +48,14 @@ export default function App() {
 						path="/"
 						element={<HomePage />}
 					/>
-					<Route
-						path="/discover"
-						element={<DiscoverPage />}
-					/>
+				<Route
+					path="/search"
+					element={<SearchPage />}
+				/>
+				<Route
+					path="/discover"
+					element={<DiscoverPage />}
+				/>
 					<Route
 						path="/liked-songs"
 						element={<LikedSongsPage />}

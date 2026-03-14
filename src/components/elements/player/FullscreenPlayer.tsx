@@ -27,6 +27,8 @@ import {
 import { observer } from 'mobx-react-lite'
 import { Fragment, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
+import { PagesConfig } from '@/config/pages.config'
 
 export const FullscreenPlayer = observer(function FullscreenPlayer() {
 	const { t } = useTranslation()
@@ -138,27 +140,31 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 						<div className="flex flex-col gap-7">
 							{/* Track info */}
 							<div className="flex items-start justify-between gap-4">
-						<div className="min-w-0">
-								<div className="flex items-center gap-2">
-									<h1
-										className={cn(
-											'truncate font-bold leading-tight transition-all duration-300',
-											queueOpen ? 'text-2xl' : 'text-4xl'
-										)}
-									>
-										{track.name}
-									</h1>
-									{track.explicit && <ExplicitBadge className="mt-1 shrink-0" />}
-								</div>
-								<p
+					<div className="min-w-0">
+							<div className="flex items-center gap-2">
+								<Link
+									to={PagesConfig.ALBUMS(encodeURIComponent(track.album))}
+									onClick={() => playerStore.toggleFullscreen()}
 									className={cn(
-										'mt-1 truncate text-white/60 transition-all duration-300',
-										queueOpen ? 'text-base' : 'text-xl'
+										'truncate font-bold leading-tight transition-all duration-300 hover:underline',
+										queueOpen ? 'text-2xl' : 'text-4xl'
 									)}
 								>
-									{track.artist.name}
-								</p>
+									{track.name}
+								</Link>
+								{track.explicit && <ExplicitBadge className="mt-1 shrink-0" />}
 							</div>
+							<Link
+								to={PagesConfig.ARTISTS(encodeURIComponent(track.artist.name))}
+								onClick={() => playerStore.toggleFullscreen()}
+								className={cn(
+									'mt-1 block truncate text-white/60 hover:underline hover:text-white transition-all duration-300',
+									queueOpen ? 'text-base' : 'text-xl'
+								)}
+							>
+								{track.artist.name}
+							</Link>
+						</div>
 								<button
 									type="button"
 									onClick={() => favoriteStore.toggleFavorite(track.name)}

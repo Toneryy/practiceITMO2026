@@ -1,4 +1,3 @@
-import { SearchField } from '@/components/elements/search-field/SearchField'
 import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { ArtistCard } from '@/components/ui/artist-card/ArtistCard'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
@@ -6,8 +5,7 @@ import { catalogStore } from '@/store/catalog.store'
 import { playerStore } from '@/store/player.store'
 import { Play } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
-import { useQueryState } from 'nuqs'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
@@ -16,24 +14,11 @@ const ARTISTS_LIMIT = 6
 
 export const HomePage = observer(function HomePage() {
 	const { t } = useTranslation()
-	const [searchTerm, setSearchTerm] = useQueryState('q')
-	const [inputValue, setInputValue] = useState(searchTerm ?? '')
 
-	useEffect(() => {
-		setInputValue(searchTerm ?? '')
-	}, [searchTerm])
-
-	// Fetch catalog on first mount if not yet loaded
 	useEffect(() => {
 		if (catalogStore.tracks.length === 0) catalogStore.fetchTracks()
 		if (catalogStore.artists.length === 0) catalogStore.fetchArtists()
 	}, [])
-
-	const filteredTracks = useMemo(
-		() => catalogStore.filterTracks(inputValue),
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-		[inputValue, catalogStore.tracks]
-	)
 
 	const popularTracks = catalogStore.tracks.slice(0, POPULAR_LIMIT)
 	const featuredArtists = catalogStore.artists.slice(0, ARTISTS_LIMIT)
@@ -58,17 +43,6 @@ export const HomePage = observer(function HomePage() {
 
 	return (
 		<PageContainer>
-			<div className="mb-5">
-				<SearchField
-					value={inputValue}
-					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-						const v = e.target.value
-						setInputValue(v)
-						setSearchTerm(v.trim() || null)
-					}}
-				/>
-			</div>
-
 			{/* Featured artist banner */}
 			{isLoading || !featuredArtist ? (
 				<div className="h-40 w-full animate-pulse rounded-xl bg-white/5" />
@@ -142,7 +116,7 @@ export const HomePage = observer(function HomePage() {
 					<section className="mt-10">
 						<h2 className="text-xl font-bold mb-4">{t('home.allTracks')}</h2>
 						<div className="mt-5">
-							<TrackTable tracks={filteredTracks} />
+							<TrackTable tracks={catalogStore.tracks} />
 						</div>
 					</section>
 				</>

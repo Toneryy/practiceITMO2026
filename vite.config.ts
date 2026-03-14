@@ -1,6 +1,5 @@
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
-import observerPlugin from 'mobx-react-observer/babel-plugin'
 import path from 'path'
 import { defineConfig } from 'vite'
 
@@ -9,16 +8,7 @@ export default defineConfig({
 	appType: 'spa',
 	root: path.resolve(__dirname),
 	plugins: [
-		react({
-			babel: {
-				plugins: [
-					observerPlugin(
-						// optional
-						{ exclude: ['src/ui-components/**'] }
-					)
-				]
-			}
-		}),
+		react(),
 		tailwindcss()
 	],
 	resolve: {

@@ -139,6 +139,12 @@ export const PlaylistPage = observer(() => {
 
 	const playlist = playlistStore.playlists.find(p => p.name === id)
 
+	// Hooks must run unconditionally — derive from playlist safely with fallbacks
+	const tracks = playlist ? catalogStore.tracksByNames(playlist.tracks) : []
+	const sortedTracks = useMemo(() => sortTracks(tracks, sortBy), [tracks, sortBy])
+	const totalDurationSec = tracks.reduce((sum, t) => sum + t.duration, 0)
+	const canReorder = sortBy === 'default' || sortBy === 'date-asc' || sortBy === 'date-desc'
+
 	if (!playlist) {
 		return (
 			<div className="p-6">
@@ -152,11 +158,6 @@ export const PlaylistPage = observer(() => {
 			</div>
 		)
 	}
-
-	const tracks = catalogStore.tracksByNames(playlist.tracks)
-	const sortedTracks = useMemo(() => sortTracks(tracks, sortBy), [tracks, sortBy])
-	const totalDurationSec = tracks.reduce((sum, t) => sum + t.duration, 0)
-	const canReorder = sortBy === 'default' || sortBy === 'date-asc' || sortBy === 'date-desc'
 
 	const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0]

@@ -11,7 +11,7 @@ class MusicPlayerStore {
 	isShuffle: boolean = false
 	repeatMode: RepeatMode = 'all'
 	volume: number = 85
-	lyricsOpen: boolean = true
+	lyricsOpen: boolean = false
 	queueOpen: boolean = false
 	fullscreenOpen: boolean = false
 	seekRequest: number | null = null

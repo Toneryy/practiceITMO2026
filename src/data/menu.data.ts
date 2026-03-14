@@ -1,5 +1,5 @@
 import type { IMenuItem } from '@/types/menu.types'
-import { Compass, Disc3, Heart, Home, Music2 } from 'lucide-react'
+import { Compass, Disc3, Heart, Home, Music2, Search } from 'lucide-react'
 import { PagesConfig } from '../config/pages.config'
 
 export const MENU_ITEMS: IMenuItem[] = [
@@ -7,6 +7,11 @@ export const MENU_ITEMS: IMenuItem[] = [
 		icon: Home,
 		name: 'nav.home',
 		link: PagesConfig.HOME
+	},
+	{
+		icon: Search,
+		name: 'nav.search',
+		link: '/search'
 	},
 	{
 		icon: Compass,

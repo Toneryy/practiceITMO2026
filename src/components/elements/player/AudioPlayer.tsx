@@ -64,12 +64,14 @@ export const AudioPlayer = observer(function AudioPlayer() {
 
 			{/* Left: Track info + like */}
 			<div className="flex min-w-0 items-center gap-8">
-			<TrackInfo
-				title={playerStore.currentTrack.name}
-				subTitle={playerStore.currentTrack.artist.name}
-				image={playerStore.currentTrack.cover}
-				explicit={playerStore.currentTrack.explicit}
-			/>
+		<TrackInfo
+			title={playerStore.currentTrack.name}
+			subTitle={playerStore.currentTrack.artist.name}
+			artistName={playerStore.currentTrack.artist.name}
+			albumName={playerStore.currentTrack.album}
+			image={playerStore.currentTrack.cover}
+			explicit={playerStore.currentTrack.explicit}
+		/>
 				<button
 					type="button"
 					onClick={() =>
