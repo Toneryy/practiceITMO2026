@@ -1,9 +1,9 @@
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
 import { authStore } from '@/store/auth.store'
 import { languageStore } from '@/store/language.store'
-import { playerStore } from '@/store/player.store'
 import {
 	Bell,
+	ChevronDown,
 	Download,
 	Globe,
 	HardDrive,
@@ -16,7 +16,7 @@ import {
 	Wifi
 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate } from 'react-router-dom'
 
@@ -35,6 +35,67 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: (v: boolean
 				}`}
 			/>
 		</button>
+	)
+}
+
+interface SelectOption {
+	value: string
+	label: string
+}
+
+function ThemeSelect({
+	value,
+	options,
+	onChange
+}: {
+	value: string
+	options: SelectOption[]
+	onChange: (v: string) => void
+}) {
+	const [open, setOpen] = useState(false)
+	const ref = useRef<HTMLDivElement>(null)
+
+	useEffect(() => {
+		if (!open) return
+		const handler = (e: MouseEvent) => {
+			if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false)
+		}
+		document.addEventListener('mousedown', handler)
+		return () => document.removeEventListener('mousedown', handler)
+	}, [open])
+
+	const activeLabel = options.find(o => o.value === value)?.label ?? value
+
+	return (
+		<div ref={ref} className="relative">
+			<button
+				type="button"
+				onClick={() => setOpen(prev => !prev)}
+				className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white outline-none transition hover:border-white/20 focus:border-primary"
+			>
+				{activeLabel}
+				<ChevronDown size={14} className={`text-neutral-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+			</button>
+			{open && (
+				<div className="absolute right-0 top-full z-20 mt-1 min-w-[120px] overflow-hidden rounded-lg border border-white/10 bg-[#2B2B30] py-1 shadow-xl">
+					{options.map(opt => (
+						<button
+							key={opt.value}
+							type="button"
+							onClick={() => {
+								onChange(opt.value)
+								setOpen(false)
+							}}
+							className={`flex w-full items-center px-3 py-2 text-left text-sm transition hover:bg-white/10 ${
+								opt.value === value ? 'text-primary font-medium' : 'text-white'
+							}`}
+						>
+							{opt.label}
+						</button>
+					))}
+				</div>
+			)}
+		</div>
 	)
 }
 
@@ -92,10 +153,20 @@ export const SettingsPage = observer(function SettingsPage() {
 	const [privateSession, setPrivateSession] = useState(false)
 	const [showListening, setShowListening] = useState(true)
 	const [offlineMode, setOfflineMode] = useState(false)
-	const [highQuality, setHighQuality] = useState(false)
+	const [audioQuality, setAudioQuality] = useState('normal')
 	const [hardwareAccel, setHardwareAccel] = useState(true)
+	const [downloadQuality, setDownloadQuality] = useState('normal')
 
-	const currentLang = languageStore.language === 'en' ? 'English' : 'Русский'
+	const qualityOptions: SelectOption[] = [
+		{ value: 'low', label: t('settings.qualityLow') },
+		{ value: 'normal', label: t('settings.qualityNormal') },
+		{ value: 'high', label: t('settings.qualityHigh') }
+	]
+
+	const langOptions: SelectOption[] = [
+		{ value: 'en', label: 'English' },
+		{ value: 'ru', label: 'Русский' }
+	]
 
 	return (
 		<PageContainer
@@ -119,14 +190,11 @@ export const SettingsPage = observer(function SettingsPage() {
 					label={t('settings.language')}
 					description={t('settings.languageDesc')}
 				>
-					<select
+					<ThemeSelect
 						value={languageStore.language}
-						onChange={e => languageStore.setLanguage(e.target.value as 'en' | 'ru')}
-						className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white outline-none focus:border-primary"
-					>
-						<option value="en">English</option>
-						<option value="ru">Русский</option>
-					</select>
+						options={langOptions}
+						onChange={v => languageStore.setLanguage(v as 'en' | 'ru')}
+					/>
 				</SettingRow>
 				<SettingRow
 					icon={Shield}
@@ -146,14 +214,11 @@ export const SettingsPage = observer(function SettingsPage() {
 					label={t('settings.audioQuality')}
 					description={t('settings.audioQualityDesc')}
 				>
-					<select
-						value={highQuality ? 'high' : 'normal'}
-						onChange={e => setHighQuality(e.target.value === 'high')}
-						className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white outline-none focus:border-primary"
-					>
-						<option value="normal">{t('settings.qualityNormal')}</option>
-						<option value="high">{t('settings.qualityHigh')}</option>
-					</select>
+					<ThemeSelect
+						value={audioQuality}
+						options={qualityOptions}
+						onChange={setAudioQuality}
+					/>
 				</SettingRow>
 				<SettingRow
 					icon={Music2}
@@ -251,14 +316,11 @@ export const SettingsPage = observer(function SettingsPage() {
 					label={t('settings.downloadQuality')}
 					description={t('settings.downloadQualityDesc')}
 				>
-					<select
-						defaultValue="normal"
-						className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white outline-none focus:border-primary"
-					>
-						<option value="low">{t('settings.qualityLow')}</option>
-						<option value="normal">{t('settings.qualityNormal')}</option>
-						<option value="high">{t('settings.qualityHigh')}</option>
-					</select>
+					<ThemeSelect
+						value={downloadQuality}
+						options={qualityOptions}
+						onChange={setDownloadQuality}
+					/>
 				</SettingRow>
 			</Section>
 		</PageContainer>
