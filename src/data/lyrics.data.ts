@@ -1,4 +1,4 @@
-// Определяем тип
+// Type definition
 export interface ILyricsLine {
 	time: number
 	text: string
@@ -10,7 +10,7 @@ export interface ILyrics {
 	lines: ILyricsLine[]
 }
 
-// Маковые данные
+// Mock data
 export const LYRICS: ILyrics[] = [
 	{
 		trackName: '90s Bitch',

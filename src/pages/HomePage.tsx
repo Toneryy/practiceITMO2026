@@ -1,58 +1,70 @@
+import { SearchField } from '@/components/elements/search-field/SearchField'
 import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { ArtistCard } from '@/components/ui/artist-card/ArtistCard'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
-import { SearchField } from '@/components/elements/search-field/SearchField'
 import { ARTISTS } from '@/data/artist.data'
 import { TRACKS } from '@/data/tracks.data'
 import { Play } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useQueryState } from 'nuqs'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 const POPULAR_LIMIT = 6
 const ARTISTS_LIMIT = 6
 
 export const HomePage = observer(function HomePage() {
 	const [searchTerm, setSearchTerm] = useQueryState('q')
+	const [inputValue, setInputValue] = useState(searchTerm ?? '')
+
+	useEffect(() => {
+		setInputValue(searchTerm ?? '')
+	}, [searchTerm])
 
 	const filteredTracks = useMemo(() => {
-		if (!searchTerm) return TRACKS
+		const term = inputValue.trim().toLowerCase()
+		if (!term) return TRACKS
 
-		return TRACKS.filter(track =>
-			track.name.toLowerCase().includes(searchTerm.toLowerCase())
+		return TRACKS.filter(
+			track =>
+				track.name.toLowerCase().includes(term) ||
+				track.artist.name.toLowerCase().includes(term)
 		)
-	}, [searchTerm])
+	}, [inputValue])
 
 	const popularTracks = TRACKS.slice(0, POPULAR_LIMIT)
 	const featuredArtists = ARTISTS.slice(0, ARTISTS_LIMIT)
 
 	return (
 		<PageContainer>
-			<SearchField
-				value={searchTerm || ''}
-				onChange={e => setSearchTerm(e.target.value)}
-			/>
+			<div className="mb-5">
+				<SearchField
+					value={inputValue}
+					onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+						const v = e.target.value
+						setInputValue(v)
+						setSearchTerm(v.trim() || null)
+					}}
+				/>
+			</div>
 
-			<div className="relative">
+			<div className="flex w-full items-end gap-6 rounded-xl bg-gradient-to-br from-[#3d2c5c] via-[#2d2d44] to-[#1a1a2e] p-6 pb-8">
 				<img
 					src="/banner.jpg"
-					alt=""
-					className="rounded-xl"
+					alt="Daft Punk"
+					className="h-40 w-40 shrink-0 rounded-full object-cover shadow-2xl"
 				/>
-				<div className="flex items-center justify-between absolute bottom-layout left-0 w-full px-layout">
-					<div>
-						<h1 className="text-2xl font-semibold mb-0.5 text-white">
-							Daft Punk
-						</h1>
-						<h2 className="text-primary font-medium">6.8m listeners</h2>
-					</div>
-					<button className="rounded-full bg-gradient-to-r from-[#2F3034] to-[#1F2026] p-5 border border-player-bg border-solid duration-300 hover:translate-y-[-2px] hover:shadow">
-						<Play
-							className="text-primary"
-							fill="var(--color-primary)"
-						/>
-					</button>
+				<div className="min-w-0 flex-1">
+					<h1 className="text-2xl font-semibold mb-0.5 text-white">
+						Daft Punk
+					</h1>
+					<h2 className="text-primary font-medium">6.8m listeners</h2>
 				</div>
+				<button className="shrink-0 rounded-full bg-gradient-to-r from-[#2F3034] to-[#1F2026] p-5 border border-player-bg border-solid duration-300 hover:translate-y-[-2px] hover:shadow">
+					<Play
+						className="text-primary"
+						fill="var(--color-primary)"
+					/>
+				</button>
 			</div>
 
 			<section className="mt-8">

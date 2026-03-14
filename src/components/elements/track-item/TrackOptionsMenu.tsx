@@ -30,11 +30,13 @@ const ICON_SIZE = 18
 interface Props {
 	track: ITrack
 	playlistName?: string | null
+	inQueue?: boolean
 }
 
 export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 	track,
-	playlistName
+	playlistName,
+	inQueue
 }: Props) {
 	const [open, setOpen] = useState(false)
 	const [addToPlaylistOpen, setAddToPlaylistOpen] = useState(false)
@@ -272,7 +274,7 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 										/>
 										<input
 											type="text"
-											placeholder="Поиск плейлиста"
+											placeholder="Search playlist"
 											value={playlistSearch}
 											onChange={e =>
 												setPlaylistSearch(e.target.value)
@@ -292,7 +294,7 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 									onClick={handleCreatePlaylist}
 								>
 									<Plus size={ICON_SIZE} className="shrink-0" />
-									Создать плейлист
+									Create playlist
 								</button>
 
 								<div className="my-1 border-t border-white/10" />
@@ -302,8 +304,8 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 									{filteredPlaylists.length === 0 ? (
 										<div className="px-3 py-2 text-xs text-white/50">
 											{playlistSearch.trim()
-												? 'Ничего не найдено'
-												: 'Нет плейлистов'}
+												? 'No results'
+												: 'No playlists'}
 										</div>
 									) : (
 										filteredPlaylists.map(pl => {
@@ -347,7 +349,7 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 							onClick={() => close()}
 						>
 							<Radio size={ICON_SIZE} className="shrink-0" />
-							К радио по треку
+							Go to track radio
 						</button>
 					</div>
 
@@ -361,7 +363,7 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 							onClick={() => close()}
 						>
 							<Info size={ICON_SIZE} className="shrink-0" />
-							Посмотреть сведения
+							View details
 						</button>
 					</div>
 
@@ -404,6 +406,29 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 							Share
 						</button>
 					</div>
+
+					{/* Remove from queue */}
+					{inQueue && (
+						<>
+							<div className="my-1 border-t border-white/10" />
+							<div className="px-1">
+								<button
+									type="button"
+									className={cn(
+										menuItemClass,
+										'text-red-400 hover:bg-red-500/10'
+									)}
+									onClick={() => {
+										playerStore.removeFromQueue(track.name)
+										close()
+									}}
+								>
+									<Trash2 size={ICON_SIZE} className="shrink-0" />
+									Remove from queue
+								</button>
+							</div>
+						</>
+					)}
 				</div>
 			)}
 		</div>

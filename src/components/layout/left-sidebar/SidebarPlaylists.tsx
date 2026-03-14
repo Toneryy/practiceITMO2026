@@ -61,7 +61,14 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 							>
 								<div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-gradient-to-br from-zinc-600 to-zinc-800">
 									<img
-										src="https://picsum.photos/seed/playlist/80/80"
+										src={
+											playlist.image ||
+											(playlist.tracks.length > 0
+												? TRACKS.find(t => t.name === playlist.tracks[0])
+														?.cover
+												: undefined) ||
+											'https://picsum.photos/seed/playlist/80/80'
+										}
 										alt=""
 										className="h-full w-full object-cover transition group-hover:brightness-75"
 									/>

@@ -1,3 +1,4 @@
+import { FullscreenPlayer } from '@/components/elements/player/FullscreenPlayer'
 import Layout from '@/components/layout/Layout'
 import { AlbumPage } from '@/pages/AlbumPage'
 import { Toaster } from 'sonner'
@@ -14,10 +15,12 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 export default function App() {
 	return (
 		<BrowserRouter>
+			<FullscreenPlayer />
 			<Toaster
 				closeButton
 				position="bottom-right"
 				theme="dark"
+				visibleToasts={3}
 				toastOptions={{
 					className: 'sonner-toast-custom',
 					duration: 3000,

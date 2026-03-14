@@ -63,9 +63,9 @@ export function ProgressBar({
 	}, [isDragging, value, onSeek])
 
 	return (
-		<div className="group flex w-full items-center gap-3">
+		<div className="group flex w-full items-center gap-6">
 			{isTextDisplayed && (
-				<span className="w-8 shrink-0 text-xs text-zinc-400">
+				<span className="w-5 shrink-0 text-right text-xs text-zinc-400 tabular-nums">
 					{transformDuration(currentValue)}
 				</span>
 			)}
@@ -103,7 +103,7 @@ export function ProgressBar({
 			</div>
 
 			{isTextDisplayed && (
-				<span className="w-8 shrink-0 text-xs text-zinc-500">
+				<span className="w-5 shrink-0 text-left text-xs text-zinc-500 tabular-nums">
 					{transformDuration(value)}
 				</span>
 			)}

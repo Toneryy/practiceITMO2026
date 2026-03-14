@@ -10,14 +10,14 @@ const Layout = observer(function Layout({ children }: PropsWithChildren<unknown>
 		<>
 			<div
 				className={`grid h-[calc(100vh-80px)] overflow-hidden ${
-					playerStore.lyricsOpen
+					playerStore.lyricsOpen || playerStore.queueOpen
 						? 'grid-cols-[1fr_3.5fr_1.1fr]'
 						: 'grid-cols-[1fr_4.6fr]'
 				}`}
 			>
 				<LeftSidebar />
 				<main className="scrollbar-custom h-full overflow-y-auto pt-5">{children}</main>
-				{playerStore.lyricsOpen && <RightSidebar />}
+				{(playerStore.lyricsOpen || playerStore.queueOpen) && <RightSidebar />}
 			</div>
 			<AudioPlayer />
 		</>

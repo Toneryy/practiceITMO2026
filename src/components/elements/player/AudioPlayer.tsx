@@ -1,8 +1,13 @@
 import { ProgressBar } from '@/components/ui/progress-bar/ProgressBar'
 import { TrackInfo } from '@/components/ui/track-info/TrackInfo'
+import { favoriteStore } from '@/store/favorite.store'
 import { playerStore } from '@/store/player.store'
+import cn from 'clsx'
 import {
 	FileText,
+	Heart,
+	List,
+	Maximize2,
 	Pause,
 	Play,
 	Repeat,
@@ -42,74 +47,102 @@ export const AudioPlayer = observer(function AudioPlayer() {
 				: Volume2
 
 	return (
-		<div className="fixed bottom-0 left-0 z-50 grid w-full grid-cols-[1.2fr_5fr] gap-8 border-t border-white/10 bg-player-bg px-10 py-5">
-			<TrackInfo
-				title={playerStore.currentTrack.name}
-				subTitle={playerStore.currentTrack.artist.name}
-				image={playerStore.currentTrack.cover}
+		<div className="fixed bottom-0 left-0 z-50 grid w-full grid-cols-3 gap-4 border-t border-white/10 bg-player-bg px-6 py-2.5">
+			<audio
+				ref={audioRef}
+				src={playerStore.currentTrack.file}
+				onTimeUpdate={e =>
+					playerStore.seek(Math.floor(e.currentTarget.currentTime))
+				}
+				onEnded={handleEnded}
 			/>
 
-			<div className="flex flex-col justify-center gap-4">
-				<audio
-					ref={audioRef}
-					src={playerStore.currentTrack.file}
-					onTimeUpdate={e =>
-						playerStore.seek(Math.floor(e.currentTarget.currentTime))
-					}
-					onEnded={handleEnded}
+			{/* Left: Track info + like */}
+			<div className="flex min-w-0 items-center gap-8">
+				<TrackInfo
+					title={playerStore.currentTrack.name}
+					subTitle={playerStore.currentTrack.artist.name}
+					image={playerStore.currentTrack.cover}
 				/>
+				<button
+					type="button"
+					onClick={() =>
+						favoriteStore.toggleFavorite(playerStore.currentTrack!.name)
+					}
+					className="shrink-0 opacity-60 transition hover:opacity-100"
+					title={
+						favoriteStore.favoritesName.includes(
+							playerStore.currentTrack!.name
+						)
+							? 'Remove from favorites'
+							: 'Add to favorites'
+					}
+				>
+					<Heart
+						size={24}
+						className={cn(
+							favoriteStore.favoritesName.includes(
+								playerStore.currentTrack!.name
+							)
+								? 'fill-primary text-primary'
+								: undefined
+						)}
+					/>
+				</button>
+			</div>
 
-				<div className="grid grid-cols-[1fr_6.9fr_2fr] items-center gap-8">
-					<div className="flex items-center gap-4">
-						<button
-							type="button"
-							onClick={() => playerStore.toggleShuffle()}
-							className={`p-1 transition hover:opacity-100 ${playerStore.isShuffle ? 'text-primary opacity-100' : 'text-zinc-500 opacity-70'}`}
-							title={playerStore.isShuffle ? 'Shuffle on' : 'Shuffle off'}
-						>
-							<Shuffle size={20} />
-						</button>
-						<button
-							type="button"
-							onClick={() => playerStore.changeTrack('prev')}
-							className="opacity-70 transition hover:opacity-100"
-							title="Previous track"
-						>
-							<SkipBack size={22} />
-						</button>
-						<button
-							type="button"
-							className="rounded-full bg-primary p-3 text-black transition hover:scale-105"
-							onClick={() => playerStore.togglePlayPause()}
-						>
-							{playerStore.isPlaying ? (
-								<Pause size={22} fill="currentColor" />
-							) : (
-								<Play size={22} fill="currentColor" />
-							)}
-						</button>
-						<button
-							type="button"
-							onClick={() => playerStore.changeTrack('next')}
-							className="opacity-70 transition hover:opacity-100"
-							title="Next track"
-						>
-							<SkipForward size={22} />
-						</button>
-						<button
-							type="button"
-							onClick={() => playerStore.toggleRepeat()}
-							className={`p-1 transition hover:opacity-100 ${playerStore.repeatMode !== 'none' ? 'text-primary opacity-100' : 'text-zinc-500 opacity-70'}`}
-							title={`Repeat: ${playerStore.repeatMode}`}
-						>
-							{playerStore.repeatMode === 'one' ? (
-								<Repeat1 size={20} />
-							) : (
-								<Repeat size={20} />
-							)}
-						</button>
-					</div>
-
+			{/* Center: Playback controls */}
+			<div className="flex flex-col items-center justify-center gap-1.5">
+				<div className="flex items-center gap-5">
+					<button
+						type="button"
+						onClick={() => playerStore.toggleShuffle()}
+						className={`p-1 opacity-60 transition hover:opacity-100 ${playerStore.isShuffle ? 'text-primary opacity-100' : 'text-zinc-500'}`}
+						title={playerStore.isShuffle ? 'Shuffle on' : 'Shuffle off'}
+					>
+						<Shuffle size={18} />
+					</button>
+					<button
+						type="button"
+						onClick={() => playerStore.changeTrack('prev')}
+						className="opacity-60 transition hover:opacity-100"
+						title="Previous track"
+					>
+						<SkipBack size={20} />
+					</button>
+					<button
+						type="button"
+						className="rounded-full bg-primary p-2.5 text-black transition hover:scale-105"
+						onClick={() => playerStore.togglePlayPause()}
+					>
+						{playerStore.isPlaying ? (
+							<Pause size={20} fill="currentColor" />
+						) : (
+							<Play size={20} fill="currentColor" />
+						)}
+					</button>
+					<button
+						type="button"
+						onClick={() => playerStore.changeTrack('next')}
+						className="opacity-60 transition hover:opacity-100"
+						title="Next track"
+					>
+						<SkipForward size={20} />
+					</button>
+					<button
+						type="button"
+						onClick={() => playerStore.toggleRepeat()}
+						className={`p-1 opacity-60 transition hover:opacity-100 ${playerStore.repeatMode !== 'none' ? 'text-primary opacity-100' : 'text-zinc-500'}`}
+						title={`Repeat: ${playerStore.repeatMode}`}
+					>
+						{playerStore.repeatMode === 'one' ? (
+							<Repeat1 size={18} />
+						) : (
+							<Repeat size={18} />
+						)}
+					</button>
+				</div>
+				<div className="w-full max-w-2xl">
 					<ProgressBar
 						currentValue={playerStore.currentTime}
 						value={playerStore.currentTrack.duration}
@@ -117,43 +150,63 @@ export const AudioPlayer = observer(function AudioPlayer() {
 						onSeek={onSeek}
 						isTextDisplayed
 					/>
-
-					<div className="flex items-center gap-3 pl-6">
-						<button
-							type="button"
-							onClick={() => playerStore.toggleLyrics()}
-							className={`p-1.5 transition hover:opacity-100 ${playerStore.lyricsOpen ? 'text-primary opacity-100' : 'text-zinc-500 opacity-60 hover:text-white'}`}
-							title={playerStore.lyricsOpen ? 'Hide lyrics' : 'Show lyrics'}
-						>
-							<FileText size={20} />
-						</button>
-						<button
-							type="button"
-							onClick={() => {
-								const next = playerStore.volume === 0 ? 85 : 0
-								playerStore.setVolume(next)
-								if (audioRef.current) {
-									audioRef.current.volume = next / 100
-								}
-							}}
-						>
-							<VolumeIcon size={20} />
-						</button>
-						<ProgressBar
-							currentValue={playerStore.volume}
-							value={100}
-							progress={playerStore.volume}
-							onSeek={val => {
-								playerStore.setVolume(val)
-								if (audioRef.current) {
-									audioRef.current.volume = val / 100
-								}
-							}}
-							isTextDisplayed={false}
-							isThumbDisplayed
-						/>
-					</div>
 				</div>
+			</div>
+
+			{/* Right: Volume & extras */}
+			<div className="flex min-w-0 items-center justify-end gap-3">
+				<button
+					type="button"
+					onClick={() => playerStore.toggleQueue()}
+					className={`p-1.5 opacity-60 transition hover:opacity-100 ${playerStore.queueOpen ? 'text-primary opacity-100' : 'text-zinc-500 hover:text-white'}`}
+					title={playerStore.queueOpen ? 'Hide queue' : 'Show queue'}
+				>
+					<List size={22} />
+				</button>
+				<button
+					type="button"
+					onClick={() => playerStore.toggleLyrics()}
+					className={`p-1.5 opacity-60 transition hover:opacity-100 ${playerStore.lyricsOpen ? 'text-primary opacity-100' : 'text-zinc-500 hover:text-white'}`}
+					title={playerStore.lyricsOpen ? 'Hide lyrics' : 'Show lyrics'}
+				>
+					<FileText size={22} />
+				</button>
+				<button
+					type="button"
+					onClick={() => {
+						const next = playerStore.volume === 0 ? 85 : 0
+						playerStore.setVolume(next)
+						if (audioRef.current) {
+							audioRef.current.volume = next / 100
+						}
+					}}
+					className="opacity-60 transition hover:opacity-100"
+				>
+					<VolumeIcon size={22} />
+				</button>
+				<div className="w-28 min-w-[100px] max-w-[160px]">
+					<ProgressBar
+						currentValue={playerStore.volume}
+						value={100}
+						progress={playerStore.volume}
+						onSeek={val => {
+							playerStore.setVolume(val)
+							if (audioRef.current) {
+								audioRef.current.volume = val / 100
+							}
+						}}
+						isTextDisplayed={false}
+						isThumbDisplayed
+					/>
+				</div>
+				<button
+					type="button"
+					onClick={() => playerStore.toggleFullscreen()}
+					className={`p-1.5 opacity-60 transition hover:opacity-100 ${playerStore.fullscreenOpen ? 'text-primary opacity-100' : ''}`}
+					title="Fullscreen player"
+				>
+					<Maximize2 size={22} />
+				</button>
 			</div>
 		</div>
 	)

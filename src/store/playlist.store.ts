@@ -1,8 +1,15 @@
 import { makeAutoObservable } from 'mobx'
+import { arrayMove } from '@dnd-kit/sortable'
 import { toast } from 'sonner'
 
+export interface IPlaylist {
+	name: string
+	tracks: string[]
+	image?: string
+}
+
 class PlaylistStore {
-	playlists: { name: string; tracks: string[] }[] = JSON.parse(
+	playlists: IPlaylist[] = JSON.parse(
 		localStorage.getItem('playlists') || '[]'
 	)
 	pinnedNames: string[] = JSON.parse(
@@ -44,6 +51,14 @@ class PlaylistStore {
 		this.pinnedNames = this.pinnedNames.filter(n => n !== name)
 		this.saveToLocalStorage()
 		toast.success('Playlist deleted')
+	}
+
+	updatePlaylistImage(playlistName: string, image: string) {
+		const playlist = this.playlists.find(p => p.name === playlistName)
+		if (!playlist) return
+		playlist.image = image
+		this.saveToLocalStorage()
+		toast.success('Cover updated')
 	}
 
 	togglePinned(name: string) {
@@ -92,6 +107,23 @@ class PlaylistStore {
 		const playlist = this.playlists.find(p => p.name === playlistName)
 		if (!playlist) return false
 		return playlist.tracks.includes(trackName)
+	}
+
+	reorderTracks(playlistName: string, oldIndex: number, newIndex: number) {
+		const playlist = this.playlists.find(p => p.name === playlistName)
+		if (!playlist) return
+		if (
+			oldIndex < 0 ||
+			newIndex < 0 ||
+			oldIndex >= playlist.tracks.length ||
+			newIndex >= playlist.tracks.length ||
+			oldIndex === newIndex
+		) {
+			return
+		}
+		playlist.tracks = arrayMove(playlist.tracks, oldIndex, newIndex)
+		this.saveToLocalStorage()
+		toast.success('Order updated')
 	}
 }
 
