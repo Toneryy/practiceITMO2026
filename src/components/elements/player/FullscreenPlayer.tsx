@@ -25,8 +25,10 @@ import {
 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { Fragment, useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export const FullscreenPlayer = observer(function FullscreenPlayer() {
+	const { t } = useTranslation()
 	const track = playerStore.currentTrack
 	const [queueOpen, setQueueOpen] = useState(false)
 
@@ -57,10 +59,10 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 	const currentQueueIndex = queue.findIndex(t => t.name === track.name)
 
 	const details = [
-		{ icon: User, label: 'Artist', value: track.artist.name },
-		{ icon: Disc3, label: 'Album', value: track.album },
-		{ icon: Clock, label: 'Duration', value: transformDuration(track.duration) },
-		{ icon: Mic2, label: 'Listeners', value: track.artist.listenersCount?.toLocaleString() ?? '—' },
+		{ icon: User, label: t('player.detailArtist'), value: track.artist.name },
+		{ icon: Disc3, label: t('player.detailAlbum'), value: track.album },
+		{ icon: Clock, label: t('player.detailDuration'), value: transformDuration(track.duration) },
+		{ icon: Mic2, label: t('player.detailListeners'), value: track.artist.listenersCount?.toLocaleString() ?? '—' },
 	]
 
 	return (
@@ -95,10 +97,10 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 							? 'bg-white/20 text-white'
 							: 'text-white/50 hover:text-white'
 					)}
-					title={queueOpen ? 'Hide queue' : 'Show queue'}
+					title={queueOpen ? t('player.hideQueue') : t('player.showQueue')}
 				>
 					<ListMusic size={18} />
-					Queue
+					{t('player.queue')}
 				</button>
 			</div>
 
@@ -262,15 +264,15 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 						)}
 					>
 						<div className="flex h-[70vh] w-80 flex-col rounded-2xl bg-white/10 backdrop-blur-sm">
-							<div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
-								<h2 className="font-semibold">Queue</h2>
-								<span className="text-sm text-white/40">{queue.length} tracks</span>
-							</div>
-							<div className="scrollbar-custom flex-1 overflow-y-auto py-2">
-								{queue.length === 0 ? (
-									<p className="px-5 py-4 text-sm text-white/40">
-										No tracks in queue
-									</p>
+						<div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+							<h2 className="font-semibold">{t('player.queue')}</h2>
+							<span className="text-sm text-white/40">{t('player.tracksCount', { count: queue.length })}</span>
+						</div>
+						<div className="scrollbar-custom flex-1 overflow-y-auto py-2">
+							{queue.length === 0 ? (
+								<p className="px-5 py-4 text-sm text-white/40">
+									{t('player.noTracksInQueue')}
+								</p>
 								) : (
 									queue.map((t, index) => {
 										const isCurrent = t.name === track.name
@@ -325,7 +327,7 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 					{/* Lyrics */}
 					{lyric && (
 						<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">
-							<h2 className="mb-6 text-xl font-semibold">Lyrics</h2>
+							<h2 className="mb-6 text-xl font-semibold">{t('player.lyrics')}</h2>
 							<div className="flex flex-col gap-1 text-base leading-relaxed">
 								{lyric.lines.map((line, i) => (
 									<Fragment key={i}>
@@ -354,7 +356,7 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 
 					{/* Details */}
 					<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">
-						<h2 className="mb-6 text-xl font-semibold">Details</h2>
+						<h2 className="mb-6 text-xl font-semibold">{t('player.details')}</h2>
 						<div className="grid grid-cols-1 gap-4">
 							{details.map(({ icon: Icon, label, value }) => (
 								<div
@@ -381,9 +383,9 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 					<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">
 						<div className="mb-6 flex items-center gap-2">
 							<ListMusic size={20} className="text-white/60" />
-							<h2 className="text-xl font-semibold">Queue</h2>
+							<h2 className="text-xl font-semibold">{t('player.queue')}</h2>
 							<span className="ml-auto text-sm text-white/40">
-								{queue.length} tracks
+								{t('player.tracksCount', { count: queue.length })}
 							</span>
 						</div>
 						<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

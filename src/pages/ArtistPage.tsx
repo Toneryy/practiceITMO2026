@@ -20,6 +20,7 @@ import {
 import { observer } from 'mobx-react-lite'
 import { createPortal } from 'react-dom'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -34,14 +35,14 @@ type SortOption =
 	| 'date-asc'
 	| 'date-desc'
 
-const SORT_OPTIONS: { value: SortOption; label: string; icon: typeof ListOrdered }[] = [
-	{ value: 'default', label: 'Default order', icon: ListOrdered },
-	{ value: 'date-asc', label: 'Date added (oldest first)', icon: Calendar },
-	{ value: 'date-desc', label: 'Date added (newest first)', icon: Calendar },
-	{ value: 'title-asc', label: 'Title A–Z', icon: ArrowDownAZ },
-	{ value: 'title-desc', label: 'Title Z–A', icon: ArrowUpAZ },
-	{ value: 'duration-asc', label: 'Duration (short first)', icon: Clock },
-	{ value: 'duration-desc', label: 'Duration (long first)', icon: Clock }
+const SORT_OPTIONS: { value: SortOption; labelKey: string; icon: typeof ListOrdered }[] = [
+	{ value: 'default', labelKey: 'sort.default', icon: ListOrdered },
+	{ value: 'date-asc', labelKey: 'sort.dateAsc', icon: Calendar },
+	{ value: 'date-desc', labelKey: 'sort.dateDesc', icon: Calendar },
+	{ value: 'title-asc', labelKey: 'sort.titleAsc', icon: ArrowDownAZ },
+	{ value: 'title-desc', labelKey: 'sort.titleDesc', icon: ArrowUpAZ },
+	{ value: 'duration-asc', labelKey: 'sort.durationAsc', icon: Clock },
+	{ value: 'duration-desc', labelKey: 'sort.durationDesc', icon: Clock }
 ]
 
 function sortTracks(tracks: ITrack[], sort: SortOption): ITrack[] {
@@ -68,6 +69,7 @@ function formatTotalDuration(seconds: number): string {
 }
 
 export const ArtistPage = observer(function ArtistPage() {
+	const { t } = useTranslation()
 	const decodedName = useDecodedParam('name')
 	const [imageError, setImageError] = useState(false)
 	const [sortBy, setSortBy] = useState<SortOption>('default')
@@ -190,14 +192,14 @@ export const ArtistPage = observer(function ArtistPage() {
 	if (!artist) {
 		return (
 			<PageContainer
-				title="Artist not found"
+				title={t('artist.notFound')}
 				breadcrumbs={[
-					{ label: 'Home', link: '/' },
-					{ label: 'Artists', link: '/artists' }
+					{ label: t('nav.home'), link: '/' },
+					{ label: t('nav.artists'), link: '/artists' }
 				]}
 			>
 				<Link to="/artists" className="text-primary hover:underline">
-					Back to Artists
+					{t('artist.backToArtists')}
 				</Link>
 			</PageContainer>
 		)
@@ -206,8 +208,8 @@ export const ArtistPage = observer(function ArtistPage() {
 	return (
 		<PageContainer
 			breadcrumbs={[
-				{ label: 'Home', link: '/' },
-				{ label: 'Artists', link: '/artists' },
+				{ label: t('nav.home'), link: '/' },
+				{ label: t('nav.artists'), link: '/artists' },
 				{ label: artist.name }
 			]}
 		>
@@ -230,8 +232,8 @@ export const ArtistPage = observer(function ArtistPage() {
 				)}
 				<div className="min-w-0 flex-1">
 					<p className="text-sm font-medium uppercase tracking-wide text-neutral-400">
-						Artist
-					</p>
+					{t('artist.type')}
+				</p>
 					<h1 className="text-4xl font-bold sm:text-5xl">{artist.name}</h1>
 					<p className="mt-1 text-sm text-neutral-400">
 						{artist.listenersCount.toLocaleString()} listeners •{' '}
@@ -266,9 +268,9 @@ export const ArtistPage = observer(function ArtistPage() {
 									: 'bg-white/10 text-white hover:bg-white/20'
 							)}
 						>
-							{subscriptionStore.isSubscribed(artist.name)
-								? 'Subscribed'
-								: 'Subscribe'}
+					{subscriptionStore.isSubscribed(artist.name)
+							? t('artist.subscribed')
+							: t('artist.subscribe')}
 						</button>
 						<div className="flex items-center gap-3">
 							{topTracks.length > 0 && (
@@ -278,12 +280,12 @@ export const ArtistPage = observer(function ArtistPage() {
 										onClick={() =>
 											setSortMenuOpen(prev => !prev)
 										}
-										className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-sm text-white/80 hover:bg-white/20 transition-colors"
-										title="Sort tracks"
-									>
-										<ListOrdered size={18} />
-										<span>Sort</span>
-									</button>
+									className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-sm text-white/80 hover:bg-white/20 transition-colors"
+									title={t('artist.sortTitle')}
+								>
+									<ListOrdered size={18} />
+									<span>{t('artist.sort')}</span>
+								</button>
 									{sortMenuOpen &&
 										sortMenuPosition &&
 										createPortal(
@@ -296,34 +298,34 @@ export const ArtistPage = observer(function ArtistPage() {
 													right: sortMenuPosition.right
 												}}
 											>
-												{SORT_OPTIONS.map(
-													({
-														value,
-														label,
-														icon: Icon
-													}) => (
-														<button
-															key={value}
-															type="button"
-															onClick={() => {
-																setSortBy(value)
-																setSortMenuOpen(false)
-															}}
-															className={cn(
-																'flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm transition-colors',
-																sortBy === value
-																	? 'bg-primary/20 text-primary'
-																	: 'hover:bg-white/10'
-															)}
-														>
-															<Icon
-																size={16}
-																className="shrink-0 opacity-80"
-															/>
-															{label}
-														</button>
-													)
-												)}
+									{SORT_OPTIONS.map(
+												({
+													value,
+													labelKey,
+													icon: Icon
+												}) => (
+													<button
+														key={value}
+														type="button"
+														onClick={() => {
+															setSortBy(value)
+															setSortMenuOpen(false)
+														}}
+														className={cn(
+															'flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm transition-colors',
+															sortBy === value
+																? 'bg-primary/20 text-primary'
+																: 'hover:bg-white/10'
+														)}
+													>
+														<Icon
+															size={16}
+															className="shrink-0 opacity-80"
+														/>
+														{t(labelKey)}
+													</button>
+												)
+											)}
 											</div>,
 											document.body
 										)}
@@ -335,9 +337,9 @@ export const ArtistPage = observer(function ArtistPage() {
 									onClick={() =>
 										setOptionsMenuOpen(prev => !prev)
 									}
-									className="flex items-center justify-center rounded-full bg-white/10 p-2.5 text-white/80 hover:bg-white/20 transition-colors"
-									title="Artist options"
-									aria-label="Artist options"
+								className="flex items-center justify-center rounded-full bg-white/10 p-2.5 text-white/80 hover:bg-white/20 transition-colors"
+								title={t('artist.artistOptions')}
+								aria-label={t('artist.artistOptions')}
 								>
 									<MoreHorizontal size={20} />
 								</button>
@@ -357,9 +359,9 @@ export const ArtistPage = observer(function ArtistPage() {
 												onClick={() => handleShareArtist()}
 												className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-white/10"
 											>
-												<Share2 size={16} />
-												Share
-											</button>
+										<Share2 size={16} />
+											{t('artist.share')}
+										</button>
 										</div>,
 										document.body
 									)}
@@ -369,11 +371,11 @@ export const ArtistPage = observer(function ArtistPage() {
 				</div>
 			</div>
 
-			{/* Top Tracks */}
-			<section>
-				<h2 className="mb-4 text-xl font-bold">Top Tracks</h2>
-				{topTracks.length === 0 ? (
-					<p className="text-neutral-400">No tracks yet.</p>
+		{/* Top Tracks */}
+		<section>
+			<h2 className="mb-4 text-xl font-bold">{t('artist.topTracks')}</h2>
+			{topTracks.length === 0 ? (
+				<p className="text-neutral-400">{t('artist.noTracks')}</p>
 				) : (
 					<TrackTable tracks={sortedTracks} />
 				)}

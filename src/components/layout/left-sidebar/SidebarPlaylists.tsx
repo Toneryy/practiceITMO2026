@@ -7,9 +7,11 @@ import { playerStore } from '@/store/player.store'
 import { MoreHorizontal, Pause, Pencil, Pin, Play, Plus, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
 
 export const SidebarPlaylists = observer(function SidebarPlaylists() {
+	const { t } = useTranslation()
 	const [value, setValue] = useState('')
 	const [isShow, setIsShow] = useState(false)
 	const [optionsMenuPlaylist, setOptionsMenuPlaylist] = useState<string | null>(
@@ -39,9 +41,9 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 
 	return (
 		<div ref={containerRef}>
-			<div className="text-xs uppercase text-neutral-500 mb-3">Playlists</div>
+			<div className="text-xs uppercase text-neutral-500 mb-3">{t('sidebar.playlists')}</div>
 			{playlistStore.sortedPlaylists.length === 0 ? (
-				<div className="text-neutral-400 text-sm mb-5">No playlists yet</div>
+				<div className="text-neutral-400 text-sm mb-5">{t('sidebar.noPlaylists')}</div>
 			) : (
 				<ul className="mb-5">
 					{playlistStore.sortedPlaylists.map(playlist => (
@@ -98,8 +100,8 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 														playerStore.play()
 													}
 												}}
-												className="absolute inset-0 flex items-center justify-center rounded text-white opacity-0 transition group-hover:opacity-100"
-												title={isPlayingFromPlaylist ? 'Pause' : 'Play'}
+										className="absolute inset-0 flex items-center justify-center rounded text-white opacity-0 transition group-hover:opacity-100"
+											title={isPlayingFromPlaylist ? t('sidebar.pause') : t('sidebar.play')}
 											>
 												{isPlayingFromPlaylist ? (
 													<Pause
@@ -124,7 +126,7 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 										{playlistStore.isPinned(playlist.name) && (
 											<Pin size={12} className="shrink-0 text-primary" />
 										)}
-										Playlist · {playlist.tracks.length}
+										{t('sidebar.playlistType')} · {playlist.tracks.length}
 									</span>
 								</div>
 							</NavLink>
@@ -138,47 +140,47 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 										)
 									}}
 									className="p-1.5 rounded opacity-0 group-hover:opacity-100 hover:bg-white/10 transition-opacity text-neutral-400 hover:text-white"
-									title="Options"
+									title={t('sidebar.options')}
 								>
 									<MoreHorizontal size={16} />
 								</button>
 								{optionsMenuPlaylist === playlist.name && (
 									<CustomMenu side="right">
-										<button
-											type="button"
-											onClick={() => {
-												setOptionsMenuPlaylist(null)
-												setRenamingPlaylist(playlist.name)
-												setRenameValue(playlist.name)
-											}}
-											className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-white/10"
-										>
-											<Pencil size={16} />
-											Rename
-										</button>
-										<button
-											type="button"
-											onClick={() => {
-												playlistStore.togglePinned(playlist.name)
-											}}
-											className={`flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-white/10 ${playlistStore.isPinned(playlist.name) ? 'text-primary' : ''}`}
-										>
-											<Pin size={16} />
-											{playlistStore.isPinned(playlist.name)
-												? 'Unpin'
-												: 'Pin to top'}
-										</button>
-										<button
-											type="button"
-											onClick={() => {
-												setOptionsMenuPlaylist(null)
-												setPlaylistToDelete(playlist.name)
-											}}
-											className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm text-red-400 hover:bg-white/10"
-										>
-											<Trash2 size={16} />
-											Delete
-										</button>
+									<button
+										type="button"
+										onClick={() => {
+											setOptionsMenuPlaylist(null)
+											setRenamingPlaylist(playlist.name)
+											setRenameValue(playlist.name)
+										}}
+										className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-white/10"
+									>
+										<Pencil size={16} />
+										{t('sidebar.rename')}
+									</button>
+									<button
+										type="button"
+										onClick={() => {
+											playlistStore.togglePinned(playlist.name)
+										}}
+										className={`flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-white/10 ${playlistStore.isPinned(playlist.name) ? 'text-primary' : ''}`}
+									>
+										<Pin size={16} />
+										{playlistStore.isPinned(playlist.name)
+											? t('sidebar.unpin')
+											: t('sidebar.pinToTop')}
+									</button>
+									<button
+										type="button"
+										onClick={() => {
+											setOptionsMenuPlaylist(null)
+											setPlaylistToDelete(playlist.name)
+										}}
+										className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm text-red-400 hover:bg-white/10"
+									>
+										<Trash2 size={16} />
+										{t('sidebar.delete')}
+									</button>
 									</CustomMenu>
 								)}
 							</div>
@@ -191,7 +193,7 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 					className="flex gap-1.5 bg-zinc-700/30 py-2 px-3.5 rounded-md duration-300 transition-colors hover:bg-zinc-700/50"
 					onClick={() => setIsShow(prev => !prev)}
 				>
-					<Plus /> <span>New Playlist</span>
+					<Plus /> <span>{t('sidebar.newPlaylist')}</span>
 				</button>
 
 				{isShow && (
@@ -199,7 +201,7 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 						<input
 							autoFocus
 							type="text"
-							placeholder="Playlist name"
+							placeholder={t('sidebar.playlistNamePlaceholder')}
 							value={value}
 							onChange={e => setValue(e.target.value)}
 							onKeyDown={e => {
@@ -217,10 +219,10 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 
 			{renamingPlaylist && (
 				<div className="mt-2">
-					<input
-						autoFocus
-						type="text"
-						placeholder="New name"
+				<input
+					autoFocus
+					type="text"
+					placeholder={t('sidebar.newNamePlaceholder')}
 						value={renameValue}
 						onChange={e => setRenameValue(e.target.value)}
 						onKeyDown={e => {
@@ -247,13 +249,12 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 						playlistStore.deletePlaylist(playlistToDelete)
 						setPlaylistToDelete(null)
 					}}
-					title="Delete playlist?"
-					confirmLabel="Delete"
-					cancelLabel="Cancel"
-					variant="danger"
-				>
-					Are you sure you want to delete &quot;{playlistToDelete}&quot;? This
-					cannot be undone.
+			title={t('playlist.deleteTitle')}
+				confirmLabel={t('playlist.delete')}
+				cancelLabel={t('playlist.cancel')}
+				variant="danger"
+			>
+				{t('playlist.deleteConfirm', { name: playlistToDelete })}
 				</ConfirmModal>
 			)}
 		</div>

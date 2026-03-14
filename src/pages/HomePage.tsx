@@ -8,11 +8,13 @@ import { Play } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useQueryState } from 'nuqs'
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const POPULAR_LIMIT = 6
 const ARTISTS_LIMIT = 6
 
 export const HomePage = observer(function HomePage() {
+	const { t } = useTranslation()
 	const [searchTerm, setSearchTerm] = useQueryState('q')
 	const [inputValue, setInputValue] = useState(searchTerm ?? '')
 
@@ -67,25 +69,25 @@ export const HomePage = observer(function HomePage() {
 				</button>
 			</div>
 
-			<section className="mt-8">
-				<h2 className="text-xl font-bold mb-4">Popular Tracks</h2>
-				<TrackTable tracks={popularTracks} />
-			</section>
+		<section className="mt-8">
+			<h2 className="text-xl font-bold mb-4">{t('home.popularTracks')}</h2>
+			<TrackTable tracks={popularTracks} />
+		</section>
 
-			<section className="mt-10">
-				<h2 className="text-xl font-bold mb-4">Artists</h2>
-				<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-					{featuredArtists.map(artist => (
-						<ArtistCard
-							key={artist.name}
-							artist={artist}
-						/>
-					))}
-				</div>
-			</section>
+		<section className="mt-10">
+			<h2 className="text-xl font-bold mb-4">{t('home.artists')}</h2>
+			<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+				{featuredArtists.map(artist => (
+					<ArtistCard
+						key={artist.name}
+						artist={artist}
+					/>
+				))}
+			</div>
+		</section>
 
-			<section className="mt-10">
-				<h2 className="text-xl font-bold mb-4">All Tracks</h2>
+		<section className="mt-10">
+			<h2 className="text-xl font-bold mb-4">{t('home.allTracks')}</h2>
 				<div className="mt-5">
 					<TrackTable tracks={filteredTracks} />
 				</div>

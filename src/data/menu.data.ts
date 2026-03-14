@@ -5,38 +5,38 @@ import { PagesConfig } from '../config/pages.config'
 export const MENU_ITEMS: IMenuItem[] = [
 	{
 		icon: Home,
-		name: 'Home',
+		name: 'nav.home',
 		link: PagesConfig.HOME
 	},
 	{
 		icon: Compass,
-		name: 'Discover',
+		name: 'nav.discover',
 		link: '/discover'
 	},
 	{
 		icon: Music2,
-		name: 'Artists',
+		name: 'nav.artists',
 		link: PagesConfig.ARTISTS()
 	},
 	{
 		icon: Heart,
-		name: 'Liked Songs',
+		name: 'nav.likedSongs',
 		link: PagesConfig.LIKED_SONGS
 	},
 	{
 		icon: Disc3,
-		name: 'Albums',
+		name: 'nav.albums',
 		link: '/albums'
 	}
 ]
 
 export const LIBRARY_MENU_ITEMS: IMenuItem[] = [
 	{
-		name: 'Made For You',
+		name: 'nav.madeForYou',
 		link: PagesConfig.MADE_FOR_YOU
 	},
 	{
-		name: 'Recently Played',
+		name: 'nav.recentlyPlayed',
 		link: PagesConfig.RECENTLY_PLAYED
 	}
 ]

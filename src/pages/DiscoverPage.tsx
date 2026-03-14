@@ -4,11 +4,13 @@ import { ArtistCard } from '@/components/ui/artist-card/ArtistCard'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
 import { ARTISTS } from '@/data/artist.data'
 import { TRACKS } from '@/data/tracks.data'
+import { useTranslation } from 'react-i18next'
 
 const TRENDING_ARTISTS_LIMIT = 6
 const POPULAR_TRACKS_LIMIT = 6
 
 export function DiscoverPage() {
+	const { t } = useTranslation()
 	const trendingArtists = ARTISTS.slice(0, TRENDING_ARTISTS_LIMIT)
 	const popularTracks = TRACKS.slice(0, POPULAR_TRACKS_LIMIT)
 
@@ -22,14 +24,14 @@ export function DiscoverPage() {
 
 	return (
 		<PageContainer
-			title="Discover"
+			title={t('discover.title')}
 			breadcrumbs={[
-				{ label: 'Home', link: '/' },
-				{ label: 'Discover' }
+				{ label: t('nav.home'), link: '/' },
+				{ label: t('discover.title') }
 			]}
 		>
 			<section className="mb-10">
-				<h2 className="mb-4 text-xl font-bold">Trending Artists</h2>
+				<h2 className="mb-4 text-xl font-bold">{t('discover.trendingArtists')}</h2>
 				<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
 					{trendingArtists.map(artist => (
 						<ArtistCard
@@ -40,8 +42,8 @@ export function DiscoverPage() {
 				</div>
 			</section>
 
-			<section className="mb-10">
-				<h2 className="mb-4 text-xl font-bold">Popular Albums</h2>
+		<section className="mb-10">
+			<h2 className="mb-4 text-xl font-bold">{t('discover.popularAlbums')}</h2>
 				<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
 					{albums.map(([album, track]) => (
 						<AlbumCard
@@ -54,8 +56,8 @@ export function DiscoverPage() {
 				</div>
 			</section>
 
-			<section>
-				<h2 className="mb-4 text-xl font-bold">Popular Tracks</h2>
+		<section>
+			<h2 className="mb-4 text-xl font-bold">{t('discover.popularTracks')}</h2>
 				<TrackTable tracks={popularTracks} />
 			</section>
 		</PageContainer>

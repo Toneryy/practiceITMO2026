@@ -20,10 +20,12 @@ import {
 	Volume2
 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { useAudioPlayer } from './useAudioPlayer'
 
 export const AudioPlayer = observer(function AudioPlayer() {
 	const { audioRef, onSeek } = useAudioPlayer()
+	const { t } = useTranslation()
 
 	if (!playerStore.currentTrack) return null
 
@@ -74,8 +76,8 @@ export const AudioPlayer = observer(function AudioPlayer() {
 						favoriteStore.favoritesName.includes(
 							playerStore.currentTrack!.name
 						)
-							? 'Remove from favorites'
-							: 'Add to favorites'
+							? t('player.removeFromFavorites')
+							: t('player.addToFavorites')
 					}
 				>
 					<Heart
@@ -98,7 +100,7 @@ export const AudioPlayer = observer(function AudioPlayer() {
 						type="button"
 						onClick={() => playerStore.toggleShuffle()}
 						className={`p-1 opacity-60 transition hover:opacity-100 ${playerStore.isShuffle ? 'text-primary opacity-100' : 'text-zinc-500'}`}
-						title={playerStore.isShuffle ? 'Shuffle on' : 'Shuffle off'}
+						title={playerStore.isShuffle ? t('player.shuffleOn') : t('player.shuffleOff')}
 					>
 						<Shuffle size={18} />
 					</button>
@@ -106,7 +108,7 @@ export const AudioPlayer = observer(function AudioPlayer() {
 						type="button"
 						onClick={() => playerStore.changeTrack('prev')}
 						className="opacity-60 transition hover:opacity-100"
-						title="Previous track"
+						title={t('player.prevTrack')}
 					>
 						<SkipBack size={20} />
 					</button>
@@ -125,7 +127,7 @@ export const AudioPlayer = observer(function AudioPlayer() {
 						type="button"
 						onClick={() => playerStore.changeTrack('next')}
 						className="opacity-60 transition hover:opacity-100"
-						title="Next track"
+						title={t('player.nextTrack')}
 					>
 						<SkipForward size={20} />
 					</button>
@@ -133,7 +135,7 @@ export const AudioPlayer = observer(function AudioPlayer() {
 						type="button"
 						onClick={() => playerStore.toggleRepeat()}
 						className={`p-1 opacity-60 transition hover:opacity-100 ${playerStore.repeatMode !== 'none' ? 'text-primary opacity-100' : 'text-zinc-500'}`}
-						title={`Repeat: ${playerStore.repeatMode}`}
+						title={t('player.repeat', { mode: playerStore.repeatMode })}
 					>
 						{playerStore.repeatMode === 'one' ? (
 							<Repeat1 size={18} />
@@ -159,7 +161,7 @@ export const AudioPlayer = observer(function AudioPlayer() {
 					type="button"
 					onClick={() => playerStore.toggleQueue()}
 					className={`p-1.5 opacity-60 transition hover:opacity-100 ${playerStore.queueOpen ? 'text-primary opacity-100' : 'text-zinc-500 hover:text-white'}`}
-					title={playerStore.queueOpen ? 'Hide queue' : 'Show queue'}
+					title={playerStore.queueOpen ? t('player.hideQueue') : t('player.showQueue')}
 				>
 					<List size={22} />
 				</button>
@@ -167,7 +169,7 @@ export const AudioPlayer = observer(function AudioPlayer() {
 					type="button"
 					onClick={() => playerStore.toggleLyrics()}
 					className={`p-1.5 opacity-60 transition hover:opacity-100 ${playerStore.lyricsOpen ? 'text-primary opacity-100' : 'text-zinc-500 hover:text-white'}`}
-					title={playerStore.lyricsOpen ? 'Hide lyrics' : 'Show lyrics'}
+					title={playerStore.lyricsOpen ? t('player.hideLyrics') : t('player.showLyrics')}
 				>
 					<FileText size={22} />
 				</button>
@@ -203,7 +205,7 @@ export const AudioPlayer = observer(function AudioPlayer() {
 					type="button"
 					onClick={() => playerStore.toggleFullscreen()}
 					className={`p-1.5 opacity-60 transition hover:opacity-100 ${playerStore.fullscreenOpen ? 'text-primary opacity-100' : ''}`}
-					title="Fullscreen player"
+					title={t('player.fullscreen')}
 				>
 					<Maximize2 size={22} />
 				</button>

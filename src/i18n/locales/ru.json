@@ -1,0 +1,117 @@
+{
+  "nav": {
+    "home": "Главная",
+    "discover": "Обзор",
+    "artists": "Исполнители",
+    "likedSongs": "Любимые треки",
+    "albums": "Альбомы",
+    "madeForYou": "Для вас",
+    "recentlyPlayed": "Недавно слушали",
+    "yourLibrary": "Ваша библиотека"
+  },
+  "player": {
+    "shuffleOn": "Перемешать вкл.",
+    "shuffleOff": "Перемешать выкл.",
+    "prevTrack": "Предыдущий трек",
+    "nextTrack": "Следующий трек",
+    "fullscreen": "Полноэкранный плеер",
+    "removeFromFavorites": "Убрать из избранного",
+    "addToFavorites": "Добавить в избранное",
+    "hideQueue": "Скрыть очередь",
+    "showQueue": "Показать очередь",
+    "hideLyrics": "Скрыть текст",
+    "showLyrics": "Показать текст",
+    "repeat": "Повтор: {{mode}}",
+    "queue": "Очередь",
+    "noTracksInQueue": "Очередь пуста",
+    "tracksCount": "{{count}} треков",
+    "lyrics": "Текст песни",
+    "details": "Подробнее",
+    "detailArtist": "Исполнитель",
+    "detailAlbum": "Альбом",
+    "detailDuration": "Длительность",
+    "detailListeners": "Слушатели"
+  },
+  "search": {
+    "placeholder": "Поиск треков, исполнителей..."
+  },
+  "sidebar": {
+    "playlists": "Плейлисты",
+    "noPlaylists": "Пока нет плейлистов",
+    "newPlaylist": "Новый плейлист",
+    "playlistNamePlaceholder": "Название плейлиста",
+    "newNamePlaceholder": "Новое название",
+    "rename": "Переименовать",
+    "pinToTop": "Закрепить",
+    "unpin": "Открепить",
+    "delete": "Удалить",
+    "options": "Параметры",
+    "playlistType": "Плейлист",
+    "pause": "Пауза",
+    "play": "Воспроизвести"
+  },
+  "home": {
+    "popularTracks": "Популярные треки",
+    "artists": "Исполнители",
+    "allTracks": "Все треки"
+  },
+  "artist": {
+    "notFound": "Исполнитель не найден",
+    "type": "Исполнитель",
+    "topTracks": "Лучшие треки",
+    "noTracks": "Треков пока нет.",
+    "subscribed": "Подписан",
+    "subscribe": "Подписаться",
+    "sort": "Сортировка",
+    "sortTitle": "Сортировать треки",
+    "artistOptions": "Параметры исполнителя",
+    "share": "Поделиться",
+    "backToArtists": "К исполнителям"
+  },
+  "album": {
+    "notFound": "Альбом не найден",
+    "type": "Альбом",
+    "backToAlbums": "К альбомам"
+  },
+  "playlist": {
+    "notFound": "Плейлист не найден",
+    "empty": "В плейлисте пока нет треков.",
+    "emptyDescription": "Добавьте треки с главной страницы или через поиск — используйте меню у трека.",
+    "findTracks": "Найти треки",
+    "backToHome": "На главную",
+    "sort": "Сортировка",
+    "sortTitle": "Сортировать треки",
+    "playlistOptions": "Параметры плейлиста",
+    "share": "Поделиться",
+    "deletePlaylist": "Удалить плейлист",
+    "deleteTitle": "Удалить плейлист?",
+    "delete": "Удалить",
+    "cancel": "Отмена",
+    "deleteConfirm": "Вы уверены, что хотите удалить «{{name}}»? Это действие нельзя отменить.",
+    "tracksCount": "{{count}} треков"
+  },
+  "likedSongs": {
+    "title": "Любимые треки",
+    "empty": "Вы ещё не добавили ни одного трека в избранное."
+  },
+  "recentlyPlayed": {
+    "title": "Недавно слушали",
+    "empty": "Треков пока нет."
+  },
+  "discover": {
+    "title": "Обзор",
+    "trendingArtists": "Популярные исполнители",
+    "popularAlbums": "Популярные альбомы",
+    "popularTracks": "Популярные треки"
+  },
+  "sort": {
+    "default": "По умолчанию",
+    "playlistOrder": "Порядок плейлиста",
+    "dateAsc": "Дата добавления (сначала старые)",
+    "dateDesc": "Дата добавления (сначала новые)",
+    "titleAsc": "Название А–Я",
+    "titleDesc": "Название Я–А",
+    "durationAsc": "Длительность (короткие первыми)",
+    "durationDesc": "Длительность (длинные первыми)"
+  }
+}

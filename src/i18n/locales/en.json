@@ -1,0 +1,117 @@
+{
+  "nav": {
+    "home": "Home",
+    "discover": "Discover",
+    "artists": "Artists",
+    "likedSongs": "Liked Songs",
+    "albums": "Albums",
+    "madeForYou": "Made For You",
+    "recentlyPlayed": "Recently Played",
+    "yourLibrary": "Your Library"
+  },
+  "player": {
+    "shuffleOn": "Shuffle on",
+    "shuffleOff": "Shuffle off",
+    "prevTrack": "Previous track",
+    "nextTrack": "Next track",
+    "fullscreen": "Fullscreen player",
+    "removeFromFavorites": "Remove from favorites",
+    "addToFavorites": "Add to favorites",
+    "hideQueue": "Hide queue",
+    "showQueue": "Show queue",
+    "hideLyrics": "Hide lyrics",
+    "showLyrics": "Show lyrics",
+    "repeat": "Repeat: {{mode}}",
+    "queue": "Queue",
+    "noTracksInQueue": "No tracks in queue",
+    "tracksCount": "{{count}} tracks",
+    "lyrics": "Lyrics",
+    "details": "Details",
+    "detailArtist": "Artist",
+    "detailAlbum": "Album",
+    "detailDuration": "Duration",
+    "detailListeners": "Listeners"
+  },
+  "search": {
+    "placeholder": "Search for songs, artists, etc..."
+  },
+  "sidebar": {
+    "playlists": "Playlists",
+    "noPlaylists": "No playlists yet",
+    "newPlaylist": "New Playlist",
+    "playlistNamePlaceholder": "Playlist name",
+    "newNamePlaceholder": "New name",
+    "rename": "Rename",
+    "pinToTop": "Pin to top",
+    "unpin": "Unpin",
+    "delete": "Delete",
+    "options": "Options",
+    "playlistType": "Playlist",
+    "pause": "Pause",
+    "play": "Play"
+  },
+  "home": {
+    "popularTracks": "Popular Tracks",
+    "artists": "Artists",
+    "allTracks": "All Tracks"
+  },
+  "artist": {
+    "notFound": "Artist not found",
+    "type": "Artist",
+    "topTracks": "Top Tracks",
+    "noTracks": "No tracks yet.",
+    "subscribed": "Subscribed",
+    "subscribe": "Subscribe",
+    "sort": "Sort",
+    "sortTitle": "Sort tracks",
+    "artistOptions": "Artist options",
+    "share": "Share",
+    "backToArtists": "Back to Artists"
+  },
+  "album": {
+    "notFound": "Album not found",
+    "type": "Album",
+    "backToAlbums": "Back to Albums"
+  },
+  "playlist": {
+    "notFound": "Playlist not found",
+    "empty": "No tracks in this playlist yet.",
+    "emptyDescription": "Add tracks from Home or search — use the menu on a track to add it here.",
+    "findTracks": "Find tracks",
+    "backToHome": "Back to Home",
+    "sort": "Sort",
+    "sortTitle": "Sort tracks",
+    "playlistOptions": "Playlist options",
+    "share": "Share",
+    "deletePlaylist": "Delete playlist",
+    "deleteTitle": "Delete playlist?",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This cannot be undone.",
+    "tracksCount": "{{count}} tracks"
+  },
+  "likedSongs": {
+    "title": "Liked Songs",
+    "empty": "You haven't liked any songs yet."
+  },
+  "recentlyPlayed": {
+    "title": "Recently Played",
+    "empty": "No tracks played yet."
+  },
+  "discover": {
+    "title": "Discover",
+    "trendingArtists": "Trending Artists",
+    "popularAlbums": "Popular Albums",
+    "popularTracks": "Popular Tracks"
+  },
+  "sort": {
+    "default": "Default order",
+    "playlistOrder": "Playlist order",
+    "dateAsc": "Date added (oldest first)",
+    "dateDesc": "Date added (newest first)",
+    "titleAsc": "Title A\u2013Z",
+    "titleDesc": "Title Z\u2013A",
+    "durationAsc": "Duration (short first)",
+    "durationDesc": "Duration (long first)"
+  }
+}

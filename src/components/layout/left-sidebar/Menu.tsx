@@ -1,5 +1,6 @@
 import type { IMenuItem } from '@/types/menu.types'
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
 
 interface Props {
@@ -11,6 +12,8 @@ interface Props {
 }
 
 export function Menu({ items, title, emptyLabel, children, activeHighlight }: Props) {
+	const { t } = useTranslation()
+
 	return (
 		<div>
 			{title && (
@@ -44,7 +47,7 @@ export function Menu({ items, title, emptyLabel, children, activeHighlight }: Pr
 								<item.icon className="group-hover:text-primary duration-300" />
 							)}
 							<span className="group-hover:text-primary duration-300 font-medium">
-								{item.name}
+								{t(item.name)}
 							</span>
 						</NavLink>
 					</li>

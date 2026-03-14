@@ -22,6 +22,7 @@ import {
 import { observer } from 'mobx-react-lite'
 import { createPortal } from 'react-dom'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -36,14 +37,14 @@ type SortOption =
 	| 'date-asc'
 	| 'date-desc'
 
-const SORT_OPTIONS: { value: SortOption; label: string; icon: typeof ListOrdered }[] = [
-	{ value: 'default', label: 'Playlist order', icon: ListOrdered },
-	{ value: 'date-asc', label: 'Date added (oldest first)', icon: Calendar },
-	{ value: 'date-desc', label: 'Date added (newest first)', icon: Calendar },
-	{ value: 'title-asc', label: 'Title A–Z', icon: ArrowDownAZ },
-	{ value: 'title-desc', label: 'Title Z–A', icon: ArrowUpAZ },
-	{ value: 'duration-asc', label: 'Duration (short first)', icon: Clock },
-	{ value: 'duration-desc', label: 'Duration (long first)', icon: Clock }
+const SORT_OPTIONS: { value: SortOption; labelKey: string; icon: typeof ListOrdered }[] = [
+	{ value: 'default', labelKey: 'sort.playlistOrder', icon: ListOrdered },
+	{ value: 'date-asc', labelKey: 'sort.dateAsc', icon: Calendar },
+	{ value: 'date-desc', labelKey: 'sort.dateDesc', icon: Calendar },
+	{ value: 'title-asc', labelKey: 'sort.titleAsc', icon: ArrowDownAZ },
+	{ value: 'title-desc', labelKey: 'sort.titleDesc', icon: ArrowUpAZ },
+	{ value: 'duration-asc', labelKey: 'sort.durationAsc', icon: Clock },
+	{ value: 'duration-desc', labelKey: 'sort.durationDesc', icon: Clock }
 ]
 
 function sortTracks(tracks: ITrack[], sort: SortOption): ITrack[] {
@@ -70,6 +71,7 @@ function formatTotalDuration(seconds: number): string {
 }
 
 export const PlaylistPage = observer(() => {
+	const { t } = useTranslation()
 	const { id } = useParams()
 	const navigate = useNavigate()
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false)
@@ -140,12 +142,12 @@ export const PlaylistPage = observer(() => {
 	if (!playlist) {
 		return (
 			<div className="p-6">
-				<h1 className="text-2xl font-bold mb-4">Playlist not found</h1>
+				<h1 className="text-2xl font-bold mb-4">{t('playlist.notFound')}</h1>
 				<Link
 					to="/"
 					className="text-primary hover:underline"
 				>
-					Back to Home
+					{t('playlist.backToHome')}
 				</Link>
 			</div>
 		)
@@ -214,7 +216,7 @@ export const PlaylistPage = observer(() => {
 	return (
 		<PageContainer
 			breadcrumbs={[
-				{ label: 'Home', link: '/' },
+				{ label: t('nav.home'), link: '/' },
 				{ label: playlist.name }
 			]}
 		>
@@ -255,9 +257,9 @@ export const PlaylistPage = observer(() => {
 					</button>
 					<div className="min-w-0 flex-1">
 						<h1 className="text-3xl font-bold mb-2">{playlist.name}</h1>
-						<div className="text-neutral-400 text-sm mt-1 mb-6">
-							{tracks.length} tracks • {formatTotalDuration(totalDurationSec)}
-						</div>
+					<div className="text-neutral-400 text-sm mt-1 mb-6">
+						{t('playlist.tracksCount', { count: tracks.length })} • {formatTotalDuration(totalDurationSec)}
+					</div>
 						<div className="flex w-full items-center justify-between">
 							<div className="flex items-center gap-3">
 								<button
@@ -288,12 +290,12 @@ export const PlaylistPage = observer(() => {
 											onClick={() =>
 												setSortMenuOpen(prev => !prev)
 											}
-											className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-sm text-white/80 hover:bg-white/20 transition-colors"
-											title="Sort tracks"
-										>
-											<ListOrdered size={18} />
-											<span>Sort</span>
-										</button>
+										className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-sm text-white/80 hover:bg-white/20 transition-colors"
+										title={t('playlist.sortTitle')}
+									>
+										<ListOrdered size={18} />
+										<span>{t('playlist.sort')}</span>
+									</button>
 										{sortMenuOpen &&
 											sortMenuPosition &&
 											createPortal(
@@ -309,7 +311,7 @@ export const PlaylistPage = observer(() => {
 													{SORT_OPTIONS.map(
 														({
 															value,
-															label,
+															labelKey,
 															icon: Icon
 														}) => (
 															<button
@@ -332,7 +334,7 @@ export const PlaylistPage = observer(() => {
 																	size={16}
 																	className="shrink-0 opacity-80"
 																/>
-																{label}
+																{t(labelKey)}
 															</button>
 														)
 													)}
@@ -347,9 +349,9 @@ export const PlaylistPage = observer(() => {
 										onClick={() =>
 											setOptionsMenuOpen(prev => !prev)
 										}
-										className="flex items-center justify-center rounded-full bg-white/10 p-2.5 text-white/80 hover:bg-white/20 transition-colors"
-										title="Playlist options"
-										aria-label="Playlist options"
+								className="flex items-center justify-center rounded-full bg-white/10 p-2.5 text-white/80 hover:bg-white/20 transition-colors"
+								title={t('playlist.playlistOptions')}
+								aria-label={t('playlist.playlistOptions')}
 									>
 										<MoreHorizontal size={20} />
 									</button>
@@ -371,20 +373,20 @@ export const PlaylistPage = observer(() => {
 													}}
 													className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-white/10"
 												>
-													<Share2 size={16} />
-													Share
-												</button>
-												<button
-													type="button"
-													onClick={() => {
-														setOptionsMenuOpen(false)
-														setDeleteModalOpen(true)
-													}}
-													className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm text-red-400 hover:bg-white/10"
-												>
-													<Trash2 size={16} />
-													Delete playlist
-												</button>
+											<Share2 size={16} />
+											{t('playlist.share')}
+										</button>
+										<button
+											type="button"
+											onClick={() => {
+												setOptionsMenuOpen(false)
+												setDeleteModalOpen(true)
+											}}
+											className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm text-red-400 hover:bg-white/10"
+										>
+											<Trash2 size={16} />
+											{t('playlist.deletePlaylist')}
+										</button>
 											</div>,
 											document.body
 										)}
@@ -395,35 +397,33 @@ export const PlaylistPage = observer(() => {
 				</div>
 			</div>
 
-			<ConfirmModal
-				open={deleteModalOpen}
-				onClose={() => setDeleteModalOpen(false)}
-				onConfirm={handleDeletePlaylist}
-				title="Delete playlist?"
-				confirmLabel="Delete"
-				cancelLabel="Cancel"
-				variant="danger"
-			>
-				Are you sure you want to delete &quot;{playlist.name}&quot;? This cannot be
-				undone.
-			</ConfirmModal>
+		<ConfirmModal
+			open={deleteModalOpen}
+			onClose={() => setDeleteModalOpen(false)}
+			onConfirm={handleDeletePlaylist}
+			title={t('playlist.deleteTitle')}
+			confirmLabel={t('playlist.delete')}
+			cancelLabel={t('playlist.cancel')}
+			variant="danger"
+		>
+			{t('playlist.deleteConfirm', { name: playlist.name })}
+		</ConfirmModal>
 
-			{/* Empty state */}
-			{tracks.length === 0 ? (
-				<div className="rounded-xl bg-white/5 border border-white/10 border-dashed py-16 px-6 text-center">
-					<p className="text-white/60 mb-2">No tracks in this playlist yet.</p>
-					<p className="text-sm text-white/40 mb-6">
-						Add tracks from Home or search — use the menu on a track to add it
-						here.
-					</p>
-					<Link
-						to="/"
-						className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 hover:bg-white/20 transition-colors"
-					>
-						<Home size={16} />
-						Find tracks
-					</Link>
-				</div>
+		{/* Empty state */}
+		{tracks.length === 0 ? (
+			<div className="rounded-xl bg-white/5 border border-white/10 border-dashed py-16 px-6 text-center">
+				<p className="text-white/60 mb-2">{t('playlist.empty')}</p>
+				<p className="text-sm text-white/40 mb-6">
+					{t('playlist.emptyDescription')}
+				</p>
+				<Link
+					to="/"
+					className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 hover:bg-white/20 transition-colors"
+				>
+					<Home size={16} />
+					{t('playlist.findTracks')}
+				</Link>
+			</div>
 			) : (
 				<TrackTable
 						tracks={sortedTracks}

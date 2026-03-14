@@ -1,8 +1,10 @@
 import { AlbumCard } from '@/components/ui/album-card/AlbumCard'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
 import { TRACKS } from '@/data/tracks.data'
+import { useTranslation } from 'react-i18next'
 
 export function AlbumsPage() {
+	const { t } = useTranslation()
 	const albumsMap = new Map<string, (typeof TRACKS)[number]>()
 
 	TRACKS.forEach(track => {
@@ -15,10 +17,10 @@ export function AlbumsPage() {
 
 	return (
 		<PageContainer
-			title="Albums"
+			title={t('nav.albums')}
 			breadcrumbs={[
-				{ label: 'Home', link: '/' },
-				{ label: 'Albums' }
+				{ label: t('nav.home'), link: '/' },
+				{ label: t('nav.albums') }
 			]}
 		>
 			<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">

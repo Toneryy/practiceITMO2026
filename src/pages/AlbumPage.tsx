@@ -3,9 +3,11 @@ import { PageContainer } from '@/components/ui/page-container/PageContainer'
 import { TRACKS } from '@/data/tracks.data'
 import { useDecodedParam } from '@/hooks/useDecodedParam'
 import { observer } from 'mobx-react-lite'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
 export const AlbumPage = observer(function AlbumPage() {
+	const { t } = useTranslation()
 	const albumName = useDecodedParam('name')
 
 	const albumTracks = TRACKS.filter(track => track.album === albumName)
@@ -13,17 +15,17 @@ export const AlbumPage = observer(function AlbumPage() {
 	if (albumTracks.length === 0) {
 		return (
 			<PageContainer
-				title="Album not found"
+				title={t('album.notFound')}
 				breadcrumbs={[
-					{ label: 'Home', link: '/' },
-					{ label: 'Albums', link: '/albums' }
+					{ label: t('nav.home'), link: '/' },
+					{ label: t('nav.albums'), link: '/albums' }
 				]}
 			>
 				<Link
 					to="/albums"
 					className="text-primary hover:underline"
 				>
-					Back to Albums
+					{t('album.backToAlbums')}
 				</Link>
 			</PageContainer>
 		)
@@ -34,8 +36,8 @@ export const AlbumPage = observer(function AlbumPage() {
 	return (
 		<PageContainer
 			breadcrumbs={[
-				{ label: 'Home', link: '/' },
-				{ label: 'Albums', link: '/albums' },
+				{ label: t('nav.home'), link: '/' },
+				{ label: t('nav.albums'), link: '/albums' },
 				{ label: albumName }
 			]}
 		>
@@ -46,7 +48,7 @@ export const AlbumPage = observer(function AlbumPage() {
 					className="h-48 w-48 shrink-0 rounded-lg object-cover"
 				/>
 				<div className="flex flex-col justify-end">
-					<p className="text-sm uppercase text-neutral-400">Album</p>
+					<p className="text-sm uppercase text-neutral-400">{t('album.type')}</p>
 					<h1 className="text-4xl font-bold">{albumName}</h1>
 					<p className="text-neutral-400">{album.artist.name}</p>
 				</div>
