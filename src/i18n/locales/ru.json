@@ -26,6 +26,7 @@
     "noTracksInQueue": "Очередь пуста",
     "tracksCount": "{{count}} треков",
     "lyrics": "Текст песни",
+    "lyricsNotFound": "Текст для этой песни не найден.",
     "details": "Подробнее",
     "detailArtist": "Исполнитель",
     "detailAlbum": "Альбом",
@@ -53,7 +54,8 @@
   "home": {
     "popularTracks": "Популярные треки",
     "artists": "Исполнители",
-    "allTracks": "Все треки"
+    "allTracks": "Все треки",
+    "featuredArtist": "Исполнитель дня"
   },
   "artist": {
     "notFound": "Исполнитель не найден",

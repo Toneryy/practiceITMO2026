@@ -3,15 +3,27 @@ import { playerStore } from '@/store/player.store'
 import { Play } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { Fragment } from 'react'
+import { useTranslation } from 'react-i18next'
 import styles from './Lyrics.module.scss'
 
 export const Lyrics = observer(function Lyrics() {
+	const { t } = useTranslation()
+
 	if (!playerStore.lyricsOpen) return null
 
 	const lyric = LYRICS.find(
 		l => l.trackName === playerStore.currentTrack?.name
 	)
-	if (!lyric) return null
+
+	if (!lyric) {
+		return (
+			<div className={`${styles.lyrics} flex h-full items-center justify-center`}>
+				<p className="text-center text-sm italic opacity-40">
+					{t('player.lyricsNotFound')}
+				</p>
+			</div>
+		)
+	}
 
 	return (
 		<div className={styles.lyrics}>

@@ -330,36 +330,38 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 
 			{/* ── Section 2: Lyrics + Details ── */}
 			<section className="mx-auto w-full max-w-5xl px-4 pb-16">
-				<div className={cn('grid gap-8', lyric ? 'grid-cols-2' : 'grid-cols-1')}>
-					{/* Lyrics */}
-					{lyric && (
-						<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">
-							<h2 className="mb-6 text-xl font-semibold">{t('player.lyrics')}</h2>
-							<div className="flex flex-col gap-1 text-base leading-relaxed">
-								{lyric.lines.map((line, i) => (
-									<Fragment key={i}>
-										{line.section && (
-											<p className="mb-1 mt-4 text-xs font-semibold uppercase tracking-widest text-white/40">
-												{line.section}
-											</p>
+			<div className="grid grid-cols-2 gap-8">
+				{/* Lyrics */}
+				<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">
+					<h2 className="mb-6 text-xl font-semibold">{t('player.lyrics')}</h2>
+					{lyric ? (
+						<div className="flex flex-col gap-1 text-base leading-relaxed">
+							{lyric.lines.map((line, i) => (
+								<Fragment key={i}>
+									{line.section && (
+										<p className="mb-1 mt-4 text-xs font-semibold uppercase tracking-widest text-white/40">
+											{line.section}
+										</p>
+									)}
+									<button
+										type="button"
+										onClick={() => playerStore.requestSeek(line.time)}
+										className={cn(
+											'text-left transition-colors hover:text-white',
+											playerStore.currentTime === line.time
+												? 'font-semibold text-primary'
+												: 'text-white/60'
 										)}
-										<button
-											type="button"
-											onClick={() => playerStore.requestSeek(line.time)}
-											className={cn(
-												'text-left transition-colors hover:text-white',
-												playerStore.currentTime === line.time
-													? 'font-semibold text-primary'
-													: 'text-white/60'
-											)}
-										>
-											{line.text}
-										</button>
-									</Fragment>
-								))}
-							</div>
+									>
+										{line.text}
+									</button>
+								</Fragment>
+							))}
 						</div>
+					) : (
+						<p className="text-sm text-white/40 italic">{t('player.lyricsNotFound')}</p>
 					)}
+				</div>
 
 					{/* Details */}
 					<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">

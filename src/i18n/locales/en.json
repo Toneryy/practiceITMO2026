@@ -26,6 +26,7 @@
     "noTracksInQueue": "No tracks in queue",
     "tracksCount": "{{count}} tracks",
     "lyrics": "Lyrics",
+    "lyricsNotFound": "No lyrics found for this track.",
     "details": "Details",
     "detailArtist": "Artist",
     "detailAlbum": "Album",
@@ -53,7 +54,8 @@
   "home": {
     "popularTracks": "Popular Tracks",
     "artists": "Artists",
-    "allTracks": "All Tracks"
+    "allTracks": "All Tracks",
+    "featuredArtist": "Featured Artist"
   },
   "artist": {
     "notFound": "Artist not found",
