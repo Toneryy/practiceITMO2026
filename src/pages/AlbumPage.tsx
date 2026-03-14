@@ -1,9 +1,9 @@
-import { Track } from '@/components/elements/track-item/Track'
+import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
 import { TRACKS } from '@/data/tracks.data'
 import { useDecodedParam } from '@/hooks/useDecodedParam'
-import { Link } from 'react-router-dom'
 import { observer } from 'mobx-react-lite'
+import { Link } from 'react-router-dom'
 
 export const AlbumPage = observer(function AlbumPage() {
 	const albumName = useDecodedParam('name')
@@ -52,15 +52,7 @@ export const AlbumPage = observer(function AlbumPage() {
 				</div>
 			</div>
 
-			<div className="flex flex-col">
-				{albumTracks.map(track => (
-					<Track
-						key={track.name}
-						track={track}
-						trackList={albumTracks}
-					/>
-				))}
-			</div>
+			<TrackTable tracks={albumTracks} />
 		</PageContainer>
 	)
 })

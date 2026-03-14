@@ -1,4 +1,4 @@
-import { Track } from '@/components/elements/track-item/Track'
+import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
 import { playerStore } from '@/store/player.store'
 import { observer } from 'mobx-react-lite'
@@ -17,15 +17,7 @@ export const RecentlyPlayedPage = observer(() => {
 			{tracks.length === 0 ? (
 				<p className="text-neutral-400">No tracks played yet.</p>
 			) : (
-				<div className="flex flex-col">
-					{tracks.map(track => (
-						<Track
-							key={track.name}
-							track={track}
-							trackList={tracks}
-						/>
-					))}
-				</div>
+				<TrackTable tracks={tracks} />
 			)}
 		</PageContainer>
 	)

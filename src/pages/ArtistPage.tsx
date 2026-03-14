@@ -1,4 +1,4 @@
-import { Track } from '@/components/elements/track-item/Track'
+import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
 import { ARTISTS } from '@/data/artist.data'
 import { TRACKS } from '@/data/tracks.data'
@@ -100,15 +100,7 @@ export const ArtistPage = observer(function ArtistPage() {
 				{topTracks.length === 0 ? (
 					<p className="text-neutral-400">No tracks yet.</p>
 				) : (
-					<div className="flex flex-col gap-0">
-						{topTracks.map(track => (
-							<Track
-								key={track.name}
-								track={track}
-								trackList={topTracks}
-							/>
-						))}
-					</div>
+					<TrackTable tracks={topTracks} />
 				)}
 			</section>
 		</PageContainer>

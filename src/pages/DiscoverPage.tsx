@@ -1,4 +1,4 @@
-import { Track } from '@/components/elements/track-item/Track'
+import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { AlbumCard } from '@/components/ui/album-card/AlbumCard'
 import { ArtistCard } from '@/components/ui/artist-card/ArtistCard'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
@@ -56,14 +56,7 @@ export function DiscoverPage() {
 
 			<section>
 				<h2 className="mb-4 text-xl font-bold">Popular Tracks</h2>
-				<div className="flex flex-col">
-					{popularTracks.map(track => (
-						<Track
-							key={track.name}
-							track={track}
-						/>
-					))}
-				</div>
+				<TrackTable tracks={popularTracks} />
 			</section>
 		</PageContainer>
 	)

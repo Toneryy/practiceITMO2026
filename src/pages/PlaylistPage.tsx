@@ -1,4 +1,4 @@
-import { Track } from '@/components/elements/track-item/Track'
+import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { ConfirmModal } from '@/components/ui/confirm-modal/ConfirmModal'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
 import { TRACKS } from '@/data/tracks.data'
@@ -139,35 +139,10 @@ export const PlaylistPage = observer(() => {
 					</Link>
 				</div>
 			) : (
-				<div className="flex flex-col">
-					{tracks.map((track, index) => (
-						<div
-							key={track.name}
-							className="flex items-center gap-3 group"
-						>
-							<span className="w-8 shrink-0 text-center text-white/50 text-sm tabular-nums">
-								{index + 1}
-							</span>
-							<div className="flex-1 min-w-0">
-								<Track
-									track={track}
-									trackList={tracks}
-									playlistName={playlist.name}
-								/>
-							</div>
-							<button
-								type="button"
-								onClick={() =>
-									playlistStore.toggleTrackInPlaylist(playlist.name, track.name)
-								}
-								className="shrink-0 p-2 text-white/40 hover:text-white rounded opacity-0 group-hover:opacity-100 transition-opacity"
-								title="Remove from playlist"
-							>
-								<Trash2 size={18} />
-							</button>
-						</div>
-					))}
-				</div>
+				<TrackTable
+					tracks={tracks}
+					playlistName={playlist.name}
+				/>
 			)}
 		</PageContainer>
 	)

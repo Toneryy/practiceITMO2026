@@ -1,7 +1,7 @@
-import { PageContainer } from '@/components/ui/page-container/PageContainer'
+import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { ArtistCard } from '@/components/ui/artist-card/ArtistCard'
+import { PageContainer } from '@/components/ui/page-container/PageContainer'
 import { SearchField } from '@/components/elements/search-field/SearchField'
-import { Track } from '@/components/elements/track-item/Track'
 import { ARTISTS } from '@/data/artist.data'
 import { TRACKS } from '@/data/tracks.data'
 import { Play } from 'lucide-react'
@@ -57,15 +57,7 @@ export const HomePage = observer(function HomePage() {
 
 			<section className="mt-8">
 				<h2 className="text-xl font-bold mb-4">Popular Tracks</h2>
-				<div className="flex flex-col gap-0">
-					{popularTracks.map(track => (
-						<Track
-							key={track.name}
-							track={track}
-							trackList={popularTracks}
-						/>
-					))}
-				</div>
+				<TrackTable tracks={popularTracks} />
 			</section>
 
 			<section className="mt-10">
@@ -82,14 +74,8 @@ export const HomePage = observer(function HomePage() {
 
 			<section className="mt-10">
 				<h2 className="text-xl font-bold mb-4">All Tracks</h2>
-				<div className="mt-5 flex flex-col gap-0">
-					{filteredTracks.map(track => (
-						<Track
-							key={track.name}
-							track={track}
-							trackList={filteredTracks}
-						/>
-					))}
+				<div className="mt-5">
+					<TrackTable tracks={filteredTracks} />
 				</div>
 			</section>
 		</PageContainer>
