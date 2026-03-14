@@ -2,11 +2,18 @@ import { TRACKS } from '@/data/tracks.data'
 import type { ITrack } from '@/types/track.types'
 import { makeAutoObservable } from 'mobx'
 
+export type RepeatMode = 'none' | 'all' | 'one'
+
 class MusicPlayerStore {
 	isPlaying: boolean = false
 	currentTrack: ITrack | null = TRACKS[0]
 	queue: ITrack[] = []
+	originalQueue: ITrack[] = []
+	isShuffle: boolean = false
+	repeatMode: RepeatMode = 'all'
 	volume: number = 85
+	lyricsOpen: boolean = true
+	seekRequest: number | null = null
 	currentTime: number = 0
 	progress: number = 0
 	recentTracks: ITrack[] = []
@@ -24,7 +31,8 @@ class MusicPlayerStore {
 
 	setTrack(track: ITrack | null, newQueue?: ITrack[]) {
 		if (newQueue !== undefined) {
-			this.queue = newQueue
+			this.originalQueue = [...newQueue]
+			this.queue = this.isShuffle ? this.shuffled(newQueue) : newQueue
 		}
 		this.currentTrack = track
 		if (track) {
@@ -53,6 +61,41 @@ class MusicPlayerStore {
 		this.volume = volume
 	}
 
+	toggleLyrics() {
+		this.lyricsOpen = !this.lyricsOpen
+	}
+
+	private shuffled(arr: ITrack[]): ITrack[] {
+		return [...arr].sort(() => Math.random() - 0.5)
+	}
+
+	toggleShuffle() {
+		this.isShuffle = !this.isShuffle
+		if (this.isShuffle) {
+			this.queue = this.shuffled(
+				this.originalQueue.length > 0 ? this.originalQueue : TRACKS
+			)
+		} else {
+			this.queue =
+				this.originalQueue.length > 0 ? [...this.originalQueue] : [...TRACKS]
+		}
+	}
+
+	toggleRepeat() {
+		const order: RepeatMode[] = ['none', 'all', 'one']
+		const idx = order.indexOf(this.repeatMode)
+		this.repeatMode = order[(idx + 1) % order.length]
+	}
+
+	requestSeek(time: number) {
+		this.seek(time)
+		this.seekRequest = time
+	}
+
+	clearSeekRequest() {
+		this.seekRequest = null
+	}
+
 	changeTrack(type: 'prev' | 'next') {
 		if (!this.currentTrack) return
 
@@ -70,6 +113,7 @@ class MusicPlayerStore {
 		this.setTrack(list[nextIndex])
 		this.currentTime = 0
 		this.progress = 0
+		this.isPlaying = true
 	}
 }
 

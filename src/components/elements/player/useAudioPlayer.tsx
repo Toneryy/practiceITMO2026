@@ -6,48 +6,34 @@ export const useAudioPlayer = () => {
 
 	useEffect(() => {
 		if (!audioRef.current) return
+		playerStore.isPlaying ? audioRef.current.play() : audioRef.current.pause()
+	}, [playerStore.isPlaying, playerStore.currentTrack])
 
-		if (playerStore.isPlaying) {
-			audioRef.current.play()
-		} else {
-			audioRef.current.pause()
+	useEffect(() => {
+		if (audioRef.current) {
+			audioRef.current.volume = playerStore.volume / 100
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [playerStore.isPlaying])
+	}, [playerStore.volume])
 
-	const togglePlayPause = () => {
-		if (!audioRef.current) return
-
-		playerStore.togglePlayPause()
-
-		if (audioRef.current.paused) {
+	useEffect(() => {
+		if (!audioRef.current || playerStore.seekRequest == null) return
+		const wasPlaying = !audioRef.current.paused
+		audioRef.current.currentTime = playerStore.seekRequest
+		playerStore.clearSeekRequest()
+		if (wasPlaying) {
 			audioRef.current.play()
-		} else {
-			audioRef.current.pause()
 		}
-	}
+	}, [playerStore.seekRequest])
 
 	const onSeek = (time: number) => {
 		if (!audioRef.current) return
-
+		const wasPlaying = !audioRef.current.paused
 		audioRef.current.currentTime = time
 		playerStore.seek(time)
-	}
-
-	const changeTrack = (type: 'prev' | 'next') => {
-		playerStore.changeTrack(type)
-
-		if (audioRef.current && playerStore.isPlaying) {
+		if (wasPlaying) {
 			audioRef.current.play()
 		}
 	}
 
-	const setVolume = (volume: number) => {
-		if (!audioRef.current) return
-
-		audioRef.current.volume = volume / 100
-		playerStore.setVolume(volume)
-	}
-
-	return { audioRef, togglePlayPause, onSeek, changeTrack, setVolume }
+	return { audioRef, onSeek }
 }

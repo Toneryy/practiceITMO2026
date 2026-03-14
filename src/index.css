@@ -68,6 +68,31 @@ input {
 	outline: none;
 }
 
+/* Custom scrollbar */
+.scrollbar-custom {
+	scrollbar-width: thin;
+	scrollbar-color: #52525b #27272a;
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-track {
+	background: #27272a;
+	border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb {
+	background: #52525b;
+	border-radius: 4px;
+}
+
+.scrollbar-custom::-webkit-scrollbar-thumb:hover {
+	background: var(--color-primary);
+}
+
 .fade-in {
 	animation: fade-in 0.4s;
 }
