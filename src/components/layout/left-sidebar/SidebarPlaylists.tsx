@@ -1,8 +1,10 @@
 import { ConfirmModal } from '@/components/ui/confirm-modal/ConfirmModal'
 import { CustomMenu } from '@/components/ui/custom-menu/CustomMenu'
 import { PagesConfig } from '@/config/pages.config'
+import { TRACKS } from '@/data/tracks.data'
 import { playlistStore } from '@/store/playlist.store'
-import { MoreHorizontal, Pencil, Pin, Plus, Trash2 } from 'lucide-react'
+import { playerStore } from '@/store/player.store'
+import { MoreHorizontal, Pause, Pencil, Pin, Play, Plus, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
@@ -45,7 +47,7 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 					{playlistStore.sortedPlaylists.map(playlist => (
 						<li
 							key={playlist.name}
-							className="group flex items-center gap-2 mb-5"
+							className="group flex items-center gap-2 mb-3"
 						>
 							<NavLink
 								to={PagesConfig.PLAYLIST(encodeURIComponent(playlist.name))}
@@ -57,12 +59,55 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 									}`
 								}
 							>
-								<div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-gradient-to-br from-zinc-600 to-zinc-800">
+								<div className="relative h-10 w-10 shrink-0 overflow-hidden rounded bg-gradient-to-br from-zinc-600 to-zinc-800">
 									<img
 										src="https://picsum.photos/seed/playlist/80/80"
 										alt=""
-										className="h-full w-full object-cover"
+										className="h-full w-full object-cover transition group-hover:brightness-75"
 									/>
+									{playlist.tracks.length > 0 && (() => {
+										const tracks = TRACKS.filter(t =>
+											playlist.tracks.includes(t.name)
+										)
+										const isPlayingFromPlaylist =
+											playerStore.currentTrack &&
+											playlist.tracks.includes(
+												playerStore.currentTrack.name
+											) &&
+											playerStore.isPlaying
+										return (
+											<button
+												type="button"
+												onClick={e => {
+													e.preventDefault()
+													e.stopPropagation()
+													if (isPlayingFromPlaylist) {
+														playerStore.pause()
+													} else if (tracks.length > 0) {
+														playerStore.setTrack(
+															tracks[0],
+															tracks
+														)
+														playerStore.play()
+													}
+												}}
+												className="absolute inset-0 flex items-center justify-center rounded text-white opacity-0 transition group-hover:opacity-100"
+												title={isPlayingFromPlaylist ? 'Pause' : 'Play'}
+											>
+												{isPlayingFromPlaylist ? (
+													<Pause
+														size={20}
+														className="fill-current"
+													/>
+												) : (
+													<Play
+														size={20}
+														className="ml-0.5 fill-current"
+													/>
+												)}
+											</button>
+										)
+									})()}
 								</div>
 								<div className="flex min-w-0 flex-1 flex-col gap-0.5">
 									<span className="group-hover:text-primary truncate font-medium duration-300">
