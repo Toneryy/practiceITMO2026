@@ -7,4 +7,5 @@ export interface IArtist {
 	image: string
 	listenersCount: number
 	tracks: ITrack[]
+	bio?: string | null
 }

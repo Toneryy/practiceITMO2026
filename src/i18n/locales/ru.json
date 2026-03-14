@@ -68,7 +68,10 @@
     "sortTitle": "Сортировать треки",
     "artistOptions": "Параметры исполнителя",
     "share": "Поделиться",
-    "backToArtists": "К исполнителям"
+    "backToArtists": "К исполнителям",
+    "bio": "Об исполнителе",
+    "bioExpand": "Показать больше",
+    "bioCollapse": "Свернуть"
   },
   "album": {
     "notFound": "Альбом не найден",

@@ -17,10 +17,11 @@ model User {
 }
 
 model Artist {
-  id             String @id @default(cuid())
-  name           String @unique
+  id             String  @id @default(cuid())
+  name           String  @unique
   image          String
-  listenersCount Int    @default(0)
+  listenersCount Int     @default(0)
+  bio            String?
 
   tracks        Track[]
   albums        Album[]

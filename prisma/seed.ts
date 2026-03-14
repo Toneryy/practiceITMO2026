@@ -1,327 +1,355 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client'
+
+// ---------------------------------------------------------------------------
+// Last.fm
+// ---------------------------------------------------------------------------
+
+const LASTFM_API_KEY = 'f181801e15062c4eaed9b90fbdefa9e3'
+const LASTFM_ROOT = 'http://ws.audioscrobbler.com/2.0/'
+
+interface LastfmArtistInfo {
+	image: string | null
+	bio: string | null
+	listenersCount: number | null
+}
+
+async function fetchArtistInfo(artistName: string): Promise<LastfmArtistInfo> {
+	const fallback: LastfmArtistInfo = { image: null, bio: null, listenersCount: null }
+	try {
+		const url =
+			`${LASTFM_ROOT}?method=artist.getinfo` +
+			`&artist=${encodeURIComponent(artistName)}` +
+			`&api_key=${LASTFM_API_KEY}` +
+			`&format=json`
+
+		const res = await fetch(url)
+		if (!res.ok) return fallback
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const data: any = await res.json()
+		const a = data?.artist
+		if (!a) return fallback
+
+		// Prefer extralarge / mega, fall back to whatever has a non-empty URL
+		const SIZE_PREF = ['mega', 'extralarge', 'large', 'medium', 'small', '']
+		const images: { '#text': string; size: string }[] = a.image ?? []
+		let image: string | null = null
+		for (const size of SIZE_PREF) {
+			const found = images.find(img => img.size === size && img['#text'])
+			if (found) { image = found['#text']; break }
+		}
+
+		// Bio summary — Last.fm wraps it with a "Read more on Last.fm" HTML link
+		const rawBio: string = a.bio?.summary ?? ''
+		// Strip the trailing "Read more on Last.fm." anchor so we have clean text
+		const bio = rawBio.replace(/<a[^>]*>Read more on Last\.fm<\/a>\.?/i, '').trim() || null
+
+		const listenersCount = a.stats?.listeners ? Number(a.stats.listeners) : null
+
+		return { image, bio, listenersCount }
+	} catch (err) {
+		console.warn(`   ⚠  Last.fm fetch failed for "${artistName}":`, (err as Error).message)
+		return fallback
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Interfaces
+// ---------------------------------------------------------------------------
 
 interface SeedArtist {
-  name: string;
-  image: string;
-  listenersCount: number;
+	name: string
+	fallbackImage: string
+	fallbackListeners: number
 }
 
 interface SeedTrack {
-  name: string;
-  album: string;
-  file: string;
-  cover: string;
-  duration: number;
-  artistName: string;
-  explicit: boolean;
+	name: string
+	album: string
+	file: string
+	cover: string
+	duration: number
+	artistName: string
+	explicit: boolean
 }
 
 interface SeedLyricsLine {
-  time: number;
-  text: string;
-  section?: string;
+	time: number
+	text: string
+	section?: string
 }
 
 interface SeedLyrics {
-  trackName: string;
-  lines: SeedLyricsLine[];
+	trackName: string
+	lines: SeedLyricsLine[]
 }
 
+// ---------------------------------------------------------------------------
+// Artists
+// ---------------------------------------------------------------------------
+
+// dicebear generates a unique, deterministic avatar SVG for any seed string —
+// looks much nicer than gray picsum squares when Last.fm returns no image.
+const dicebear = (name: string) =>
+	`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`
+
 const SEED_ARTISTS: SeedArtist[] = [
-  {
-    name: "ANNA ASTI",
-    image: "https://picsum.photos/seed/anna-asti/300/300",
-    listenersCount: 2100000,
-  },
-  {
-    name: "MACAN",
-    image: "https://picsum.photos/seed/macan/300/300",
-    listenersCount: 1500000,
-  },
-  {
-    name: "INSTASAMKA",
-    image: "https://picsum.photos/seed/instasamka/300/300",
-    listenersCount: 3200000,
-  },
-  {
-    name: "PHARAOH",
-    image: "https://picsum.photos/seed/pharaoh/300/300",
-    listenersCount: 2800000,
-  },
-  {
-    name: "Скриптонит",
-    image: "https://picsum.photos/seed/skriptonit/300/300",
-    listenersCount: 2500000,
-  },
-  {
-    name: "Король и Шут",
-    image: "https://picsum.photos/seed/korol-i-shut/300/300",
-    listenersCount: 1800000,
-  },
-  {
-    name: "Jony",
-    image: "https://picsum.photos/seed/jony/300/300",
-    listenersCount: 4100000,
-  },
-  {
-    name: "Элджей",
-    image: "https://picsum.photos/seed/eldzej/300/300",
-    listenersCount: 3000000,
-  },
-];
+	{ name: 'ANNA ASTI',    fallbackImage: dicebear('ANNA ASTI'),    fallbackListeners: 2100000 },
+	{ name: 'MACAN',        fallbackImage: dicebear('MACAN'),        fallbackListeners: 1500000 },
+	{ name: 'INSTASAMKA',   fallbackImage: dicebear('INSTASAMKA'),   fallbackListeners: 3200000 },
+	{ name: 'PHARAOH',      fallbackImage: dicebear('PHARAOH'),      fallbackListeners: 2800000 },
+	{ name: 'Скриптонит',   fallbackImage: dicebear('Скриптонит'),   fallbackListeners: 2500000 },
+	{ name: 'Король и Шут', fallbackImage: dicebear('Король и Шут'), fallbackListeners: 1800000 },
+	{ name: 'Jony',         fallbackImage: dicebear('Jony'),         fallbackListeners: 4100000 },
+	{ name: 'Элджей',       fallbackImage: dicebear('Элджей'),       fallbackListeners: 3000000 }
+]
+
+// ---------------------------------------------------------------------------
+// Tracks
+// ---------------------------------------------------------------------------
+
+// Full-length royalty-free tracks from SoundHelix (CC-licensed, no CORS block).
+// Songs 1-16 are available at this URL pattern.
+const SH = (n: number) => `https://www.soundhelix.com/examples/mp3/SoundHelix-Song-${n}.mp3`
 
 const SEED_TRACKS: SeedTrack[] = [
-  // ANNA ASTI
-  {
-    name: "Царица",
-    album: "Царица",
-    file: "/audio/asti_tsaritsa.mp3",
-    cover: "https://picsum.photos/seed/tsaritsa/300/300",
-    duration: 215,
-    artistName: "ANNA ASTI",
-    explicit: false,
-  },
-  {
-    name: "По барам",
-    album: "Феникс",
-    file: "/audio/asti_po_baram.mp3",
-    cover: "https://picsum.photos/seed/po-baram/300/300",
-    duration: 238,
-    artistName: "ANNA ASTI",
-    explicit: false,
-  },
+	// ANNA ASTI
+	{ name: 'Царица',    album: 'Царица', file: SH(1),  duration: 372, cover: 'https://picsum.photos/seed/tsaritsa/300/300',  artistName: 'ANNA ASTI',    explicit: false },
+	{ name: 'По барам',  album: 'Феникс', file: SH(2),  duration: 417, cover: 'https://picsum.photos/seed/po-baram/300/300',  artistName: 'ANNA ASTI',    explicit: false },
 
-  // MACAN
-  {
-    name: "Asphalt 8",
-    album: "12",
-    file: "/audio/macan_asphalt.mp3",
-    cover: "https://picsum.photos/seed/asphalt/300/300",
-    duration: 162,
-    artistName: "MACAN",
-    explicit: false,
-  },
-  {
-    name: "IVL",
-    album: "12",
-    file: "/audio/macan_ivl.mp3",
-    cover: "https://picsum.photos/seed/macan12/300/300",
-    duration: 145,
-    artistName: "MACAN",
-    explicit: false,
-  },
+	// MACAN
+	{ name: 'Asphalt 8', album: '12',     file: SH(3),  duration: 212, cover: 'https://picsum.photos/seed/asphalt/300/300',   artistName: 'MACAN',        explicit: false },
+	{ name: 'IVL',       album: '12',     file: SH(4),  duration: 357, cover: 'https://picsum.photos/seed/macan12/300/300',   artistName: 'MACAN',        explicit: false },
 
-  // INSTASAMKA (один Explicit для примера)
-  {
-    name: "За деньги да",
-    album: "Popstar",
-    file: "/audio/samka_money.mp3",
-    cover: "https://picsum.photos/seed/popstar/300/300",
-    duration: 118,
-    artistName: "INSTASAMKA",
-    explicit: true,
-  },
-  {
-    name: "Как Mommy",
-    album: "Popstar",
-    file: "/audio/samka_mommy.mp3",
-    cover: "https://picsum.photos/seed/popstar/300/300",
-    duration: 132,
-    artistName: "INSTASAMKA",
-    explicit: false,
-  },
+	// INSTASAMKA
+	{ name: 'За деньги да', album: 'Popstar', file: SH(5), duration: 234, cover: 'https://picsum.photos/seed/popstar/300/300',   artistName: 'INSTASAMKA',   explicit: true  },
+	{ name: 'Как Mommy',    album: 'Popstar', file: SH(6), duration: 268, cover: 'https://picsum.photos/seed/popstar/300/300',   artistName: 'INSTASAMKA',   explicit: false },
 
-  // PHARAOH
-  {
-    name: "Black Siemens",
-    album: "Phlora",
-    file: "/audio/pharaoh_siemens.mp3",
-    cover: "https://picsum.photos/seed/siemens/300/300",
-    duration: 175,
-    artistName: "PHARAOH",
-    explicit: true,
-  },
-  {
-    name: "На луне",
-    album: "Phuneral",
-    file: "/audio/pharaoh_moon.mp3",
-    cover: "https://picsum.photos/seed/moon/300/300",
-    duration: 154,
-    artistName: "PHARAOH",
-    explicit: false,
-  },
+	// PHARAOH
+	{ name: 'Black Siemens', album: 'Phlora',   file: SH(7),  duration: 289, cover: 'https://picsum.photos/seed/siemens/300/300', artistName: 'PHARAOH',      explicit: true  },
+	{ name: 'На луне',       album: 'Phuneral', file: SH(8),  duration: 193, cover: 'https://picsum.photos/seed/moon/300/300',    artistName: 'PHARAOH',      explicit: false },
 
-  // Скриптонит
-  {
-    name: "Это любовь",
-    album: "Дом с нормальными явлениями",
-    file: "/audio/skrip_love.mp3",
-    cover: "https://picsum.photos/seed/skrip-house/300/300",
-    duration: 240,
-    artistName: "Скриптонит",
-    explicit: false,
-  },
-  {
-    name: "Положение",
-    album: "Праздник на улице 36",
-    file: "/audio/skrip_status.mp3",
-    cover: "https://picsum.photos/seed/skrip-36/300/300",
-    duration: 204,
-    artistName: "Скриптонит",
-    explicit: true,
-  },
+	// Скриптонит
+	{ name: 'Это любовь', album: 'Дом с нормальными явлениями', file: SH(9),  duration: 304, cover: 'https://picsum.photos/seed/skrip-house/300/300', artistName: 'Скриптонит',   explicit: false },
+	{ name: 'Положение',  album: 'Праздник на улице 36',        file: SH(10), duration: 248, cover: 'https://picsum.photos/seed/skrip-36/300/300',   artistName: 'Скриптонит',   explicit: true  },
 
-  // Король и Шут
-  {
-    name: "Кукла колдуна",
-    album: "Акустический альбом",
-    file: "/audio/kish_kukla.mp3",
-    cover: "https://picsum.photos/seed/kish-akustika/300/300",
-    duration: 203,
-    artistName: "Король и Шут",
-    explicit: false,
-  },
-  {
-    name: "Лесник",
-    album: "Будь как дома, путник",
-    file: "/audio/kish_lesnik.mp3",
-    cover: "https://picsum.photos/seed/kish-lesnik/300/300",
-    duration: 191,
-    artistName: "Король и Шут",
-    explicit: false,
-  },
+	// Король и Шут
+	{ name: 'Кукла колдуна', album: 'Акустический альбом',  file: SH(11), duration: 322, cover: 'https://picsum.photos/seed/kish-akustika/300/300', artistName: 'Король и Шут', explicit: false },
+	{ name: 'Лесник',        album: 'Будь как дома, путник', file: SH(1),  duration: 372, cover: 'https://picsum.photos/seed/kish-lesnik/300/300',  artistName: 'Король и Шут', explicit: false },
 
-  // Jony
-  {
-    name: "Комета",
-    album: "Список твоих мыслей",
-    file: "/audio/jony_kometa.mp3",
-    cover: "https://picsum.photos/seed/kometa/300/300",
-    duration: 158,
-    artistName: "Jony",
-    explicit: false,
-  },
+	// Jony
+	{ name: 'Комета', album: 'Список твоих мыслей', file: SH(12), duration: 215, cover: 'https://picsum.photos/seed/kometa/300/300', artistName: 'Jony',     explicit: false },
 
-  // Элджей
-  {
-    name: "Минимал",
-    album: "Sayonara Boy X",
-    file: "/audio/eldzej_minimal.mp3",
-    cover: "https://picsum.photos/seed/minimal/300/300",
-    duration: 201,
-    artistName: "Элджей",
-    explicit: true,
-  },
-];
+	// Элджей
+	{ name: 'Минимал', album: 'Sayonara Boy X', file: SH(13), duration: 261, cover: 'https://picsum.photos/seed/minimal/300/300', artistName: 'Элджей', explicit: true  }
+]
+
+// ---------------------------------------------------------------------------
+// Lyrics
+// ---------------------------------------------------------------------------
 
 const SEED_LYRICS: SeedLyrics[] = [
-  {
-    trackName: "Комета",
-    lines: [
-      { time: 0, section: "Припев", text: "И пускай летают вокруг кометы" },
-      { time: 5, text: "Мы с тобой одни на планете этой" },
-    ],
-  },
-  {
-    trackName: "Кукла колдуна",
-    lines: [
-      { time: 0, section: "Куплет 1", text: "В звёздную ночь при свете луны" },
-      { time: 6, text: "Слышны голоса из-за крутой горы" },
-    ],
-  },
-];
+	// ── Царица (ANNA ASTI) ────────────────────────────────────────────────────
+	{
+		trackName: 'Царица',
+		lines: [
+			{ time: 0, section: 'Куплет 1', text: 'Я не та, что была вчера' },
+			{ time: 5, text: 'Я сильнее, чем ты думал' },
+			{ time: 10, text: 'Каждый шаг — моя игра' },
+			{ time: 15, text: 'И ты больше не обманул' },
+			{ time: 22, section: 'Припев', text: 'Я царица, я в короне' },
+			{ time: 27, text: 'Мой трон — мои условия' },
+			{ time: 32, text: 'Ты хотел меня сломать' },
+			{ time: 37, text: 'Но я выше и сильнее' },
+			{ time: 44, section: 'Куплет 2', text: 'Я не плачу по ночам' },
+			{ time: 49, text: 'Я смеюсь на весь свой мир' },
+			{ time: 54, text: 'Уступать не буду вам' },
+			{ time: 59, text: 'Я своих желаний жир' },
+			{ time: 66, section: 'Припев', text: 'Я царица, я в короне' },
+			{ time: 71, text: 'Мой трон — мои условия' },
+			{ time: 76, text: 'Ты хотел меня сломать' },
+			{ time: 81, text: 'Но я выше и сильнее' },
+			{ time: 88, section: 'Бридж', text: 'Не прогнусь, не поддамся' },
+			{ time: 93, text: 'Я иду своей дорогой' },
+			{ time: 98, text: 'Каждый раз я поднимаюсь' },
+			{ time: 103, text: 'Вновь сильнее и красивее' },
+			{ time: 110, section: 'Аутро', text: 'Я царица... я царица...' }
+		]
+	},
 
-const prisma = new PrismaClient();
+	// ── Положение (Скриптонит) ────────────────────────────────────────────────
+	{
+		trackName: 'Положение',
+		lines: [
+			{ time: 0, section: 'Вступление', text: 'Знаешь, мне всё равно что думают' },
+			{ time: 6, text: 'Я своё положение сам выбираю' },
+			{ time: 13, section: 'Куплет 1', text: 'Поднялся с низа сам, без помощи чужих' },
+			{ time: 18, text: 'Мои слова звучат весомей, чем у них' },
+			{ time: 23, text: 'Я шёл один, пока они смотрели вслед' },
+			{ time: 28, text: 'Теперь я здесь, а их истории — в ответ' },
+			{ time: 35, section: 'Припев', text: 'Положение — это не деньги' },
+			{ time: 40, text: 'Положение — это то, как ты живёшь' },
+			{ time: 45, text: 'Я не ищу признания у всех' },
+			{ time: 50, text: 'Я сам себе и судья, и успех' },
+			{ time: 57, section: 'Куплет 2', text: 'Мне говорили: "Брось, не выйдет ничего"' },
+			{ time: 62, text: 'Я слышал, но не верил никому' },
+			{ time: 67, text: 'Дорога длинная, но я шагал вперёд' },
+			{ time: 72, text: 'И каждый падёж был просто поворот' },
+			{ time: 79, section: 'Припев', text: 'Положение — это не деньги' },
+			{ time: 84, text: 'Положение — это то, как ты живёшь' },
+			{ time: 89, text: 'Я не ищу признания у всех' },
+			{ time: 94, text: 'Я сам себе и судья, и успех' },
+			{ time: 101, section: 'Аутро', text: 'Моё положение — моя свобода' }
+		]
+	},
+
+	// ── Прыгну со скалы (Король и Шут) ───────────────────────────────────────
+	{
+		trackName: 'Прыгну со скалы',
+		lines: [
+			{ time: 0, section: 'Вступление', text: 'Прыгну со скалы вниз' },
+			{ time: 5, text: 'В пропасть темноты' },
+			{ time: 11, section: 'Куплет 1', text: 'Годы пронеслись, как птицы' },
+			{ time: 16, text: 'Осенью над головой' },
+			{ time: 21, text: 'Что мне снилось в детстве — снится' },
+			{ time: 26, text: 'Мне и нынешней зимой' },
+			{ time: 32, text: 'Я стою на краю скалы' },
+			{ time: 37, text: 'Ветер треплет мне волосы' },
+			{ time: 42, text: 'Подо мной — голоса земли' },
+			{ time: 47, text: 'И небесные полосы' },
+			{ time: 53, section: 'Припев', text: 'И я прыгну со скалы' },
+			{ time: 58, text: 'В мир, где нет ни боли, ни тоски' },
+			{ time: 63, text: 'Прыгну со скалы' },
+			{ time: 68, text: 'И растворюсь в потоке реки' },
+			{ time: 75, section: 'Куплет 2', text: 'Солнца нет, лишь серый свет' },
+			{ time: 80, text: 'Тучи над вершиной гор' },
+			{ time: 85, text: 'Оглянусь — и дороги нет' },
+			{ time: 90, text: 'Только скалы да простор' },
+			{ time: 96, text: 'Где-то там, внизу, покой' },
+			{ time: 101, text: 'Где не надо ничего' },
+			{ time: 106, text: 'Только ветер за спиной' },
+			{ time: 111, text: 'И молчание всего' },
+			{ time: 117, section: 'Припев', text: 'И я прыгну со скалы' },
+			{ time: 122, text: 'В мир, где нет ни боли, ни тоски' },
+			{ time: 127, text: 'Прыгну со скалы' },
+			{ time: 132, text: 'И растворюсь в потоке реки' },
+			{ time: 139, section: 'Аутро', text: 'Прыгну... прыгну...' }
+		]
+	},
+
+	// ── Комета (Jony) ─────────────────────────────────────────────────────────
+	{
+		trackName: 'Комета',
+		lines: [
+			{ time: 0, section: 'Припев', text: 'И пускай летают вокруг кометы' },
+			{ time: 5, text: 'Мы с тобой одни на планете этой' }
+		]
+	},
+
+	// ── Кукла колдуна (Король и Шут) ─────────────────────────────────────────
+	{
+		trackName: 'Кукла колдуна',
+		lines: [
+			{ time: 0, section: 'Куплет 1', text: 'В звёздную ночь при свете луны' },
+			{ time: 6, text: 'Слышны голоса из-за крутой горы' }
+		]
+	}
+]
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+const prisma = new PrismaClient()
 
 async function main() {
-  console.log("🌱  Наполнение базы культурным контентом...");
+	console.log('🌱  Наполнение базы данных...')
 
-  await prisma.user.upsert({
-    where: { id: "default-user" },
-    update: {},
-    create: { id: "default-user" },
-  });
+	await prisma.user.upsert({
+		where: { id: 'default-user' },
+		update: {},
+		create: { id: 'default-user' }
+	})
 
-  const artistMap = new Map<string, string>();
-  for (const a of SEED_ARTISTS) {
-    const record = await prisma.artist.upsert({
-      where: { name: a.name },
-      update: { image: a.image, listenersCount: a.listenersCount },
-      create: {
-        name: a.name,
-        image: a.image,
-        listenersCount: a.listenersCount,
-      },
-    });
-    artistMap.set(record.name, record.id);
-  }
+	// ── Artists (с данными из Last.fm) ────────────────────────────────────────
+	console.log('   ⏳ Запрашиваем данные артистов из Last.fm...')
+	const artistMap = new Map<string, string>()
 
-  const albumKey = (t: SeedTrack) => `${t.artistName}|||${t.album}`;
-  const seenAlbums = new Set<string>();
-  const albumMap = new Map<string, string>();
+	for (const a of SEED_ARTISTS) {
+		const lfm = await fetchArtistInfo(a.name)
 
-  for (const t of SEED_TRACKS) {
-    const key = albumKey(t);
-    if (seenAlbums.has(key)) continue;
-    seenAlbums.add(key);
-    const artistId = artistMap.get(t.artistName);
-    if (!artistId) continue;
+		const image = lfm.image || a.fallbackImage
+		const listenersCount = lfm.listenersCount ?? a.fallbackListeners
+		const bio = lfm.bio ?? null
 
-    const album = await prisma.album.upsert({
-      where: { name_artistId: { name: t.album, artistId } },
-      update: { cover: t.cover },
-      create: { name: t.album, cover: t.cover, artistId },
-    });
-    albumMap.set(key, album.id);
-  }
+		const record = await prisma.artist.upsert({
+			where: { name: a.name },
+			update: { image, listenersCount, bio },
+			create: { name: a.name, image, listenersCount, bio }
+		})
+		artistMap.set(record.name, record.id)
 
-  const trackMap = new Map<string, string>();
-  for (const t of SEED_TRACKS) {
-    const artistId = artistMap.get(t.artistName);
-    if (!artistId) continue;
-    const albumId = albumMap.get(albumKey(t));
+		const source = lfm.image ? 'Last.fm' : 'fallback'
+		console.log(`   ✓ ${a.name} (${listenersCount.toLocaleString()} listeners, photo: ${source})`)
+	}
 
-    const track = await prisma.track.upsert({
-      where: { name: t.name },
-      update: {
-        file: t.file,
-        cover: t.cover,
-        duration: t.duration,
-        explicit: t.explicit,
-        artistId,
-        albumId,
-      },
-      create: {
-        name: t.name,
-        file: t.file,
-        cover: t.cover,
-        duration: t.duration,
-        explicit: t.explicit,
-        artistId,
-        albumId,
-      },
-    });
-    trackMap.set(track.name, track.id);
-  }
+	// ── Albums ────────────────────────────────────────────────────────────────
+	const albumKey = (t: SeedTrack) => `${t.artistName}|||${t.album}`
+	const seenAlbums = new Set<string>()
+	const albumMap = new Map<string, string>()
 
-  for (const l of SEED_LYRICS) {
-    const trackId = trackMap.get(l.trackName);
-    if (!trackId) continue;
-    await prisma.lyrics.upsert({
-      where: { trackId },
-      update: { lines: JSON.stringify(l.lines) },
-      create: { trackId, lines: JSON.stringify(l.lines) },
-    });
-  }
+	for (const t of SEED_TRACKS) {
+		const key = albumKey(t)
+		if (seenAlbums.has(key)) continue
+		seenAlbums.add(key)
+		const artistId = artistMap.get(t.artistName)
+		if (!artistId) continue
 
-  console.log("✅ Сид завершен успешно. База данных готова к проверке!");
+		const album = await prisma.album.upsert({
+			where: { name_artistId: { name: t.album, artistId } },
+			update: { cover: t.cover },
+			create: { name: t.album, cover: t.cover, artistId }
+		})
+		albumMap.set(key, album.id)
+	}
+
+	// ── Tracks ────────────────────────────────────────────────────────────────
+	const trackMap = new Map<string, string>()
+	for (const t of SEED_TRACKS) {
+		const artistId = artistMap.get(t.artistName)
+		if (!artistId) continue
+		const albumId = albumMap.get(albumKey(t))
+
+		const track = await prisma.track.upsert({
+			where: { name: t.name },
+			update: { file: t.file, cover: t.cover, duration: t.duration, explicit: t.explicit, artistId, albumId },
+			create: { name: t.name, file: t.file, cover: t.cover, duration: t.duration, explicit: t.explicit, artistId, albumId }
+		})
+		trackMap.set(track.name, track.id)
+	}
+	console.log(`   ✓ Tracks: ${trackMap.size} (${SEED_TRACKS.filter(t => t.explicit).length} explicit)`)
+
+	// ── Lyrics ────────────────────────────────────────────────────────────────
+	let lyricsCount = 0
+	for (const l of SEED_LYRICS) {
+		const trackId = trackMap.get(l.trackName)
+		if (!trackId) continue
+		await prisma.lyrics.upsert({
+			where: { trackId },
+			update: { lines: JSON.stringify(l.lines) },
+			create: { trackId, lines: JSON.stringify(l.lines) }
+		})
+		lyricsCount++
+	}
+	console.log(`   ✓ Lyrics: ${lyricsCount} tracks`)
+
+	console.log('✅  Сид завершён. База данных готова!')
 }
 
 main()
-  .catch((e) => {
-    console.error("❌ Ошибка сида:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+	.catch(e => {
+		console.error('❌  Ошибка сида:', e)
+		process.exit(1)
+	})
+	.finally(async () => {
+		await prisma.$disconnect()
+	})

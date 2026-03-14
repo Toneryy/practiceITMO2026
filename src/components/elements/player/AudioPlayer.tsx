@@ -50,14 +50,17 @@ export const AudioPlayer = observer(function AudioPlayer() {
 
 	return (
 		<div className="fixed bottom-0 left-0 z-50 grid w-full grid-cols-3 gap-4 border-t border-white/10 bg-player-bg px-6 py-2.5">
-			<audio
-				ref={audioRef}
-				src={playerStore.currentTrack.file}
-				onTimeUpdate={e =>
-					playerStore.seek(Math.floor(e.currentTarget.currentTime))
-				}
-				onEnded={handleEnded}
-			/>
+		<audio
+			ref={audioRef}
+			src={playerStore.currentTrack.file}
+			onTimeUpdate={e =>
+				playerStore.seek(Math.floor(e.currentTarget.currentTime))
+			}
+			onEnded={handleEnded}
+			onError={() => {
+				playerStore.pause()
+			}}
+		/>
 
 			{/* Left: Track info + like */}
 			<div className="flex min-w-0 items-center gap-8">

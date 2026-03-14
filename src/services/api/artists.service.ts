@@ -12,6 +12,16 @@ interface ArtistRow {
 	name: string
 	image: string
 	listenersCount: number
+	bio: string | null
+}
+
+interface ArtistWithTracksRow {
+	id: string
+	name: string
+	image: string
+	listenersCount: number
+	bio: string | null
+	tracks: TrackRowWithAlbum[]
 }
 
 interface TrackRowWithAlbum {
@@ -35,6 +45,7 @@ export async function getArtists(): Promise<IArtist[]> {
 		name: r.name,
 		image: r.image,
 		listenersCount: r.listenersCount,
+		bio: r.bio,
 		tracks: []
 	}))
 }
@@ -43,14 +54,14 @@ export async function getArtists(): Promise<IArtist[]> {
  * Returns a single artist with their full track list.
  */
 export async function getArtistByName(name: string): Promise<IArtist | null> {
-	const row = await prisma.artist.findUnique({
+	const row = (await prisma.artist.findUnique({
 		where: { name },
 		include: {
 			tracks: {
 				include: { album: true }
 			}
 		}
-	})
+	})) as ArtistWithTracksRow | null
 
 	if (!row) return null
 
@@ -58,20 +69,19 @@ export async function getArtistByName(name: string): Promise<IArtist | null> {
 		id: row.id,
 		name: row.name,
 		image: row.image,
-		listenersCount: row.listenersCount
+		listenersCount: row.listenersCount,
+		bio: row.bio
 	}
 
-	const tracks: ITrack[] = (row.tracks as TrackRowWithAlbum[]).map(
-		(t: TrackRowWithAlbum) => ({
-			id: t.id,
-			name: t.name,
-			file: t.file,
-			cover: t.cover,
-			duration: t.duration,
-			album: t.album?.name ?? '',
-			artist: { ...artistBase, tracks: [] }
-		})
-	)
+	const tracks: ITrack[] = row.tracks.map((t: TrackRowWithAlbum) => ({
+		id: t.id,
+		name: t.name,
+		file: t.file,
+		cover: t.cover,
+		duration: t.duration,
+		album: t.album?.name ?? '',
+		artist: { ...artistBase, tracks: [] }
+	}))
 
 	return { ...artistBase, tracks }
 }

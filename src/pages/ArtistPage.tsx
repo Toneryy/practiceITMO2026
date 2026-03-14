@@ -90,6 +90,8 @@ export const ArtistPage = observer(function ArtistPage() {
 		catalogStore.fetchArtistByName(decodedName)
 	}, [decodedName])
 
+	const [bioExpanded, setBioExpanded] = useState(false)
+
 	const artist = catalogStore.currentArtist
 	const topTracks = artist?.tracks ?? []
 
@@ -379,15 +381,41 @@ export const ArtistPage = observer(function ArtistPage() {
 				</div>
 			</div>
 
-			{/* Top Tracks */}
-			<section>
-				<h2 className="mb-4 text-xl font-bold">{t('artist.topTracks')}</h2>
-				{topTracks.length === 0 ? (
-					<p className="text-neutral-400">{t('artist.noTracks')}</p>
-				) : (
-					<TrackTable tracks={sortedTracks} />
-				)}
+		{/* Top Tracks */}
+		<section>
+			<h2 className="mb-4 text-xl font-bold">{t('artist.topTracks')}</h2>
+			{topTracks.length === 0 ? (
+				<p className="text-neutral-400">{t('artist.noTracks')}</p>
+			) : (
+				<TrackTable tracks={sortedTracks} />
+			)}
+		</section>
+
+		{/* Biography */}
+		{artist.bio && (
+			<section className="mt-10">
+				<h2 className="mb-4 text-xl font-bold">{t('artist.bio')}</h2>
+				<div className="relative rounded-2xl bg-white/5 p-6">
+					<div
+						className={cn(
+							'overflow-hidden text-sm leading-relaxed text-white/70 transition-all duration-300',
+							bioExpanded ? 'max-h-none' : 'max-h-[200px]'
+						)}
+						dangerouslySetInnerHTML={{ __html: artist.bio }}
+					/>
+					{!bioExpanded && (
+						<div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 rounded-b-2xl bg-gradient-to-t from-[#1a1a2e]/80 to-transparent" />
+					)}
+					<button
+						type="button"
+						onClick={() => setBioExpanded(v => !v)}
+						className="mt-3 text-sm font-medium text-primary hover:underline"
+					>
+						{bioExpanded ? t('artist.bioCollapse') : t('artist.bioExpand')}
+					</button>
+				</div>
 			</section>
-		</PageContainer>
+		)}
+	</PageContainer>
 	)
 })

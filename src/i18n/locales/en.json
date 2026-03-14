@@ -68,7 +68,10 @@
     "sortTitle": "Sort tracks",
     "artistOptions": "Artist options",
     "share": "Share",
-    "backToArtists": "Back to Artists"
+    "backToArtists": "Back to Artists",
+    "bio": "About",
+    "bioExpand": "Show more",
+    "bioCollapse": "Show less"
   },
   "album": {
     "notFound": "Album not found",
