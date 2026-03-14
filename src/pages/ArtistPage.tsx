@@ -90,6 +90,11 @@ export const ArtistPage = observer(function ArtistPage() {
 		catalogStore.fetchArtistByName(decodedName)
 	}, [decodedName])
 
+	// Reset image error state when switching to another artist
+	useEffect(() => {
+		setImageError(false)
+	}, [decodedName])
+
 	const [bioExpanded, setBioExpanded] = useState(false)
 
 	const artist = catalogStore.currentArtist
@@ -234,6 +239,7 @@ export const ArtistPage = observer(function ArtistPage() {
 					</div>
 				) : (
 					<img
+						key={artist.image}
 						src={artist.image}
 						alt={artist.name}
 						className="h-48 w-48 shrink-0 rounded-full object-cover shadow-xl sm:h-56 sm:w-56"

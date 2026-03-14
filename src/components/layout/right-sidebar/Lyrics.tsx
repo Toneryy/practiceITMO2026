@@ -1,4 +1,4 @@
-import { LYRICS } from '@/data/lyrics.data'
+import { useLyrics } from '@/hooks/useLyrics'
 import { playerStore } from '@/store/player.store'
 import { Play } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
@@ -8,14 +8,25 @@ import styles from './Lyrics.module.scss'
 
 export const Lyrics = observer(function Lyrics() {
 	const { t } = useTranslation()
+	const track = playerStore.currentTrack
+	const { lines, loading } = useLyrics({
+		trackId: track?.id,
+		trackName: track?.name
+	})
 
 	if (!playerStore.lyricsOpen) return null
 
-	const lyric = LYRICS.find(
-		l => l.trackName === playerStore.currentTrack?.name
-	)
+	if (loading) {
+		return (
+			<div className={`${styles.lyrics} flex h-full items-center justify-center`}>
+				<p className="text-center text-sm italic opacity-40">
+					{t('player.lyricsLoading', 'Loading...')}
+				</p>
+			</div>
+		)
+	}
 
-	if (!lyric) {
+	if (!lines) {
 		return (
 			<div className={`${styles.lyrics} flex h-full items-center justify-center`}>
 				<p className="text-center text-sm italic opacity-40">
@@ -27,7 +38,7 @@ export const Lyrics = observer(function Lyrics() {
 
 	return (
 		<div className={styles.lyrics}>
-			{lyric.lines.map((line, index) => (
+			{lines.map((line, index) => (
 				<Fragment key={index}>
 					{line.section && <br />}
 					{line.section && <div>[ {line.section} ]</div>}

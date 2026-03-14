@@ -27,6 +27,10 @@ import {
 	getTrackById,
 	getTracks
 } from './src/services/api/tracks.service.js'
+import {
+	getLyrics,
+	getLyricsByTrackName
+} from './src/services/api/lyrics.service.js'
 
 const PORT = 3001
 const DEFAULT_USER_ID = 'default-user'
@@ -63,6 +67,35 @@ app.get('/api/tracks/:id', async (req, res) => {
 		res.json(track)
 	} catch (err) {
 		console.error('[GET /api/tracks/:id]', err)
+		res.status(500).json({ error: 'Internal server error' })
+	}
+})
+
+// ---------------------------------------------------------------------------
+// Lyrics
+// ---------------------------------------------------------------------------
+
+// GET /api/lyrics/by-name/:trackName — fallback when only track name is available
+app.get('/api/lyrics/by-name/:trackName', async (req, res) => {
+	try {
+		const trackName = decodeURIComponent(req.params.trackName)
+		const lines = await getLyricsByTrackName(trackName)
+		if (!lines) return res.status(404).json({ error: 'Lyrics not found' })
+		res.json(lines)
+	} catch (err) {
+		console.error('[GET /api/lyrics/by-name/:trackName]', err)
+		res.status(500).json({ error: 'Internal server error' })
+	}
+})
+
+// GET /api/lyrics/:trackId — returns LyricsLine[] or 404
+app.get('/api/lyrics/:trackId', async (req, res) => {
+	try {
+		const lines = await getLyrics(req.params.trackId)
+		if (!lines) return res.status(404).json({ error: 'Lyrics not found' })
+		res.json(lines)
+	} catch (err) {
+		console.error('[GET /api/lyrics/:trackId]', err)
 		res.status(500).json({ error: 'Internal server error' })
 	}
 })

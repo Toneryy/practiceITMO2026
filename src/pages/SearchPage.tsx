@@ -396,6 +396,7 @@ export const SearchPage = observer(function SearchPage() {
 									>
 										{artist.image ? (
 											<img
+												key={artist.image}
 												src={artist.image}
 												alt={artist.name}
 												className="h-28 w-28 rounded-full object-cover shadow-lg transition group-hover:brightness-90"
@@ -409,7 +410,7 @@ export const SearchPage = observer(function SearchPage() {
 										<div className="text-center">
 											<div className="font-semibold">{artist.name}</div>
 											<div className="text-xs text-white/40">
-												{artist.listenersCount.toLocaleString()} {t('search.listeners')}
+												{(artist.listenersCount ?? 0).toLocaleString()} {t('search.listeners')}
 											</div>
 										</div>
 									</Link>

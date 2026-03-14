@@ -24,6 +24,7 @@ export function ArtistCard({ artist }: Props) {
 				</div>
 			) : (
 				<img
+					key={artist.image}
 					src={artist.image}
 					alt={artist.name}
 					className="h-32 w-32 shrink-0 rounded-full object-cover"

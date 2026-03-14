@@ -1,6 +1,6 @@
 import { ExplicitBadge } from '@/components/ui/explicit-badge/ExplicitBadge'
 import { ProgressBar } from '@/components/ui/progress-bar/ProgressBar'
-import { LYRICS } from '@/data/lyrics.data'
+import { useLyrics } from '@/hooks/useLyrics'
 import { favoriteStore } from '@/store/favorite.store'
 import { playerStore } from '@/store/player.store'
 import { transformDuration } from '@/utils/transform-duration'
@@ -34,6 +34,10 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 	const { t } = useTranslation()
 	const track = playerStore.currentTrack
 	const [queueOpen, setQueueOpen] = useState(false)
+	const { lines: lyricLines, loading: lyricsLoading } = useLyrics({
+		trackId: track?.id,
+		trackName: track?.name
+	})
 
 	useEffect(() => {
 		if (!playerStore.fullscreenOpen) {
@@ -57,7 +61,6 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 				? Volume1
 				: Volume2
 
-	const lyric = LYRICS.find(l => l.trackName === track.name)
 	const queue = playerStore.queueList
 	const currentQueueIndex = queue.findIndex(t => t.name === track.name)
 
@@ -337,37 +340,41 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 			{/* ── Section 2: Lyrics + Details ── */}
 			<section className="mx-auto w-full max-w-5xl px-4 pb-16">
 			<div className="grid grid-cols-2 gap-8">
-				{/* Lyrics */}
-				<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">
-					<h2 className="mb-6 text-xl font-semibold">{t('player.lyrics')}</h2>
-					{lyric ? (
-						<div className="flex flex-col gap-1 text-base leading-relaxed">
-							{lyric.lines.map((line, i) => (
-								<Fragment key={i}>
-									{line.section && (
-										<p className="mb-1 mt-4 text-xs font-semibold uppercase tracking-widest text-white/40">
-											{line.section}
-										</p>
+			{/* Lyrics */}
+			<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">
+				<h2 className="mb-6 text-xl font-semibold">{t('player.lyrics')}</h2>
+				{lyricsLoading ? (
+					<p className="text-sm text-white/40 italic">
+						{t('player.lyricsLoading', 'Loading...')}
+					</p>
+				) : lyricLines ? (
+					<div className="flex flex-col gap-1 text-base leading-relaxed">
+						{lyricLines.map((line, i) => (
+							<Fragment key={i}>
+								{line.section && (
+									<p className="mb-1 mt-4 text-xs font-semibold uppercase tracking-widest text-white/40">
+										{line.section}
+									</p>
+								)}
+								<button
+									type="button"
+									onClick={() => playerStore.requestSeek(line.time)}
+									className={cn(
+										'text-left transition-colors hover:text-white',
+										playerStore.currentTime === line.time
+											? 'font-semibold text-primary'
+											: 'text-white/60'
 									)}
-									<button
-										type="button"
-										onClick={() => playerStore.requestSeek(line.time)}
-										className={cn(
-											'text-left transition-colors hover:text-white',
-											playerStore.currentTime === line.time
-												? 'font-semibold text-primary'
-												: 'text-white/60'
-										)}
-									>
-										{line.text}
-									</button>
-								</Fragment>
-							))}
-						</div>
-					) : (
-						<p className="text-sm text-white/40 italic">{t('player.lyricsNotFound')}</p>
-					)}
-				</div>
+								>
+									{line.text}
+								</button>
+							</Fragment>
+						))}
+					</div>
+				) : (
+					<p className="text-sm text-white/40 italic">{t('player.lyricsNotFound')}</p>
+				)}
+			</div>
 
 					{/* Details */}
 					<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">

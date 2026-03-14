@@ -50,10 +50,12 @@ export const HomePage = observer(function HomePage() {
 				<div className="flex w-full items-end gap-6 rounded-xl bg-gradient-to-br from-[#3d2c5c] via-[#2d2d44] to-[#1a1a2e] p-6 pb-8">
 					{featuredArtist.image ? (
 						<img
+							key={featuredArtist.image}
 							src={featuredArtist.image}
 							alt={featuredArtist.name}
 							className="h-40 w-40 shrink-0 cursor-pointer rounded-full object-cover shadow-2xl transition hover:brightness-90"
 							onClick={() => navigate(`/artists/${encodeURIComponent(featuredArtist.name)}`)}
+							onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
 						/>
 					) : (
 						<div

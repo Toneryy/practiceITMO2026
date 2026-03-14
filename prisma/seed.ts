@@ -1,10 +1,18 @@
+import dotenv from 'dotenv'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+// Явно загружаем .env из корня проекта (prisma/seed.ts → ../.env)
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+dotenv.config({ path: path.resolve(__dirname, '..', '.env') })
+
 import { PrismaClient } from '@prisma/client'
 
 // ---------------------------------------------------------------------------
 // Last.fm
 // ---------------------------------------------------------------------------
 
-const LASTFM_API_KEY = 'f181801e15062c4eaed9b90fbdefa9e3'
+const LASTFM_API_KEY = process.env.LASTFM_API_KEY?.trim()
 const LASTFM_ROOT = 'http://ws.audioscrobbler.com/2.0/'
 
 interface LastfmArtistInfo {
@@ -15,6 +23,10 @@ interface LastfmArtistInfo {
 
 async function fetchArtistInfo(artistName: string): Promise<LastfmArtistInfo> {
 	const fallback: LastfmArtistInfo = { image: null, bio: null, listenersCount: null }
+	if (!LASTFM_API_KEY) {
+		console.warn('   ⚠  LASTFM_API_KEY не задан в .env — пропускаем запрос к Last.fm')
+		return fallback
+	}
 	try {
 		const url =
 			`${LASTFM_ROOT}?method=artist.getinfo` +
@@ -29,12 +41,15 @@ async function fetchArtistInfo(artistName: string): Promise<LastfmArtistInfo> {
 		const a = data?.artist
 		if (!a) return fallback
 
-		// Prefer extralarge / mega, fall back to whatever has a non-empty URL
+		// Last.fm uses 2a96cbd8b46e442fc41c2b86b821562f as a generic star placeholder
+		const LASTFM_PLACEHOLDER = '2a96cbd8b46e442fc41c2b86b821562f'
+		const isReal = (url: string) => url && !url.includes(LASTFM_PLACEHOLDER)
+
 		const SIZE_PREF = ['mega', 'extralarge', 'large', 'medium', 'small', '']
 		const images: { '#text': string; size: string }[] = a.image ?? []
 		let image: string | null = null
 		for (const size of SIZE_PREF) {
-			const found = images.find(img => img.size === size && img['#text'])
+			const found = images.find(img => img.size === size && isReal(img['#text']))
 			if (found) { image = found['#text']; break }
 		}
 
@@ -49,6 +64,62 @@ async function fetchArtistInfo(artistName: string): Promise<LastfmArtistInfo> {
 	} catch (err) {
 		console.warn(`   ⚠  Last.fm fetch failed for "${artistName}":`, (err as Error).message)
 		return fallback
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Deezer — фото артистов (бесплатно, без ключей, без гео-блокировок)
+// ---------------------------------------------------------------------------
+
+async function fetchDeezerArtistImage(artistName: string): Promise<string | null> {
+	try {
+		const url = `https://api.deezer.com/search/artist?q=${encodeURIComponent(artistName)}&limit=1`
+		const res = await fetch(url)
+		if (!res.ok) {
+			console.warn(`   [Deezer] Поиск "${artistName}" — ошибка ${res.status}`)
+			return null
+		}
+		const data = (await res.json()) as {
+			data?: { name: string; picture_xl?: string; picture_big?: string; picture_medium?: string }[]
+		}
+		const artist = data.data?.[0]
+		if (!artist) {
+			console.warn(`   [Deezer] "${artistName}" — не найден`)
+			return null
+		}
+		const img = artist.picture_xl ?? artist.picture_big ?? artist.picture_medium ?? null
+		return img
+	} catch (err) {
+		console.warn(`   [Deezer] "${artistName}" — ошибка:`, (err as Error).message)
+		return null
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Last.fm — обложки альбомов
+// ---------------------------------------------------------------------------
+
+async function fetchAlbumCover(artistName: string, albumName: string): Promise<string | null> {
+	if (!LASTFM_API_KEY) return null
+	try {
+		const url =
+			`${LASTFM_ROOT}?method=album.getinfo` +
+			`&artist=${encodeURIComponent(artistName)}` +
+			`&album=${encodeURIComponent(albumName)}` +
+			`&api_key=${LASTFM_API_KEY}` +
+			`&format=json`
+		const res = await fetch(url)
+		if (!res.ok) return null
+		const data = (await res.json()) as { album?: { image?: { '#text': string; size: string }[] } }
+		const images = data.album?.image ?? []
+		const SIZE_PREF = ['mega', 'extralarge', 'large', 'medium', 'small', '']
+		for (const size of SIZE_PREF) {
+			const found = images.find((img: { size: string; '#text': string }) => img.size === size && img['#text'])
+			if (found) return found['#text']
+		}
+		return null
+	} catch {
+		return null
 	}
 }
 
@@ -87,20 +158,15 @@ interface SeedLyrics {
 // Artists
 // ---------------------------------------------------------------------------
 
-// dicebear generates a unique, deterministic avatar SVG for any seed string —
-// looks much nicer than gray picsum squares when Last.fm returns no image.
-const dicebear = (name: string) =>
-	`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(name)}`
-
 const SEED_ARTISTS: SeedArtist[] = [
-	{ name: 'ANNA ASTI',    fallbackImage: dicebear('ANNA ASTI'),    fallbackListeners: 2100000 },
-	{ name: 'MACAN',        fallbackImage: dicebear('MACAN'),        fallbackListeners: 1500000 },
-	{ name: 'INSTASAMKA',   fallbackImage: dicebear('INSTASAMKA'),   fallbackListeners: 3200000 },
-	{ name: 'PHARAOH',      fallbackImage: dicebear('PHARAOH'),      fallbackListeners: 2800000 },
-	{ name: 'Скриптонит',   fallbackImage: dicebear('Скриптонит'),   fallbackListeners: 2500000 },
-	{ name: 'Король и Шут', fallbackImage: dicebear('Король и Шут'), fallbackListeners: 1800000 },
-	{ name: 'Jony',         fallbackImage: dicebear('Jony'),         fallbackListeners: 4100000 },
-	{ name: 'Элджей',       fallbackImage: dicebear('Элджей'),       fallbackListeners: 3000000 }
+	{ name: 'ANNA ASTI',    fallbackImage: '',    fallbackListeners: 2100000 },
+	{ name: 'MACAN',        fallbackImage: '',    fallbackListeners: 1500000 },
+	{ name: 'INSTASAMKA',   fallbackImage: '',    fallbackListeners: 3200000 },
+	{ name: 'PHARAOH',      fallbackImage: '',    fallbackListeners: 2800000 },
+	{ name: 'Скриптонит',   fallbackImage: '',   fallbackListeners: 2500000 },
+	{ name: 'Король и Шут', fallbackImage: '', fallbackListeners: 1800000 },
+	{ name: 'Jony',         fallbackImage: '',         fallbackListeners: 4100000 },
+	{ name: 'Элджей',       fallbackImage: '',       fallbackListeners: 3000000 }
 ]
 
 // ---------------------------------------------------------------------------
@@ -263,6 +329,10 @@ const prisma = new PrismaClient()
 
 async function main() {
 	console.log('🌱  Наполнение базы данных...')
+	console.log(`   [DEBUG] .env загружен из: ${path.resolve(__dirname, '..', '.env')}`)
+	console.log(
+		`   [DEBUG] LASTFM_API_KEY: ${LASTFM_API_KEY ? `${LASTFM_API_KEY.slice(0, 8)}... (OK)` : 'НЕ ЗАДАН!'}`
+	)
 
 	await prisma.user.upsert({
 		where: { id: 'default-user' },
@@ -270,16 +340,30 @@ async function main() {
 		create: { id: 'default-user' }
 	})
 
-	// ── Artists (с данными из Last.fm) ────────────────────────────────────────
-	console.log('   ⏳ Запрашиваем данные артистов из Last.fm...')
+	// ── Artists (Deezer → Last.fm → пусто) ──────────────────────────────────
+	console.log('   ⏳ Загружаем данные артистов (Deezer + Last.fm)...')
 	const artistMap = new Map<string, string>()
 
 	for (const a of SEED_ARTISTS) {
 		const lfm = await fetchArtistInfo(a.name)
-
-		const image = lfm.image || a.fallbackImage
 		const listenersCount = lfm.listenersCount ?? a.fallbackListeners
 		const bio = lfm.bio ?? null
+
+		let image = ''
+		let photoSource = '—'
+
+		// 1) Deezer — основной источник фото (без ключей, без гео-блокировок)
+		const deezerImg = await fetchDeezerArtistImage(a.name)
+		if (deezerImg) {
+			image = deezerImg
+			photoSource = 'Deezer'
+		}
+
+		// 2) Last.fm — если Deezer не вернул
+		if (!image && lfm.image) {
+			image = lfm.image
+			photoSource = 'Last.fm'
+		}
 
 		const record = await prisma.artist.upsert({
 			where: { name: a.name },
@@ -288,14 +372,14 @@ async function main() {
 		})
 		artistMap.set(record.name, record.id)
 
-		const source = lfm.image ? 'Last.fm' : 'fallback'
-		console.log(`   ✓ ${a.name} (${listenersCount.toLocaleString()} listeners, photo: ${source})`)
+		console.log(`   ✓ ${a.name} (${listenersCount.toLocaleString()} listeners, photo: ${photoSource})`)
 	}
 
-	// ── Albums ────────────────────────────────────────────────────────────────
+	// ── Albums (обложки из Last.fm, fallback — picsum) ─────────────────────────
 	const albumKey = (t: SeedTrack) => `${t.artistName}|||${t.album}`
 	const seenAlbums = new Set<string>()
 	const albumMap = new Map<string, string>()
+	const albumCoverCache = new Map<string, string>() // key -> cover URL
 
 	for (const t of SEED_TRACKS) {
 		const key = albumKey(t)
@@ -304,25 +388,33 @@ async function main() {
 		const artistId = artistMap.get(t.artistName)
 		if (!artistId) continue
 
+		let cover = albumCoverCache.get(key)
+		if (!cover) {
+			const lfmCover = await fetchAlbumCover(t.artistName, t.album)
+			cover = lfmCover || t.cover
+			albumCoverCache.set(key, cover)
+		}
+
 		const album = await prisma.album.upsert({
 			where: { name_artistId: { name: t.album, artistId } },
-			update: { cover: t.cover },
-			create: { name: t.album, cover: t.cover, artistId }
+			update: { cover },
+			create: { name: t.album, cover, artistId }
 		})
 		albumMap.set(key, album.id)
 	}
 
-	// ── Tracks ────────────────────────────────────────────────────────────────
+	// ── Tracks (обложка из альбома) ───────────────────────────────────────────
 	const trackMap = new Map<string, string>()
 	for (const t of SEED_TRACKS) {
 		const artistId = artistMap.get(t.artistName)
 		if (!artistId) continue
 		const albumId = albumMap.get(albumKey(t))
+		const cover = albumCoverCache.get(albumKey(t)) ?? t.cover
 
 		const track = await prisma.track.upsert({
 			where: { name: t.name },
-			update: { file: t.file, cover: t.cover, duration: t.duration, explicit: t.explicit, artistId, albumId },
-			create: { name: t.name, file: t.file, cover: t.cover, duration: t.duration, explicit: t.explicit, artistId, albumId }
+			update: { file: t.file, cover, duration: t.duration, explicit: t.explicit, artistId, albumId },
+			create: { name: t.name, file: t.file, cover, duration: t.duration, explicit: t.explicit, artistId, albumId }
 		})
 		trackMap.set(track.name, track.id)
 	}

@@ -64,16 +64,17 @@ class CatalogStore {
 		try {
 			const res = await fetch('/api/tracks')
 			if (!res.ok) throw new Error(`HTTP ${res.status}`)
-			const data: ITrack[] = await res.json()
+			const data = await res.json()
+			const tracks = Array.isArray(data) ? data : []
 			runInAction(() => {
-				this.tracks = data
+				this.tracks = tracks
 				this.isLoadingTracks = false
 
 				// Initialize the player with the first track if it has nothing loaded yet.
 				// Import is deferred to avoid a circular dependency at module load time.
 				import('./player.store').then(({ playerStore }) => {
-					if (!playerStore.currentTrack && data.length > 0) {
-						playerStore.setTrack(data[0], data)
+					if (!playerStore.currentTrack && tracks.length > 0) {
+						playerStore.setTrack(tracks[0], tracks)
 					}
 				})
 			})
@@ -91,9 +92,10 @@ class CatalogStore {
 		try {
 			const res = await fetch('/api/artists')
 			if (!res.ok) throw new Error(`HTTP ${res.status}`)
-			const data: IArtist[] = await res.json()
+			const data = await res.json()
+			const artists = Array.isArray(data) ? data : []
 			runInAction(() => {
-				this.artists = data
+				this.artists = artists
 				this.isLoadingArtists = false
 			})
 		} catch (err) {
