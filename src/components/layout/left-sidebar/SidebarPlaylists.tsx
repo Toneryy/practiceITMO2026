@@ -117,7 +117,7 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 										{playlistStore.isPinned(playlist.name) && (
 											<Pin size={12} className="shrink-0 text-primary" />
 										)}
-										Плейлист · {playlist.tracks.length}
+										Playlist · {playlist.tracks.length}
 									</span>
 								</div>
 							</NavLink>

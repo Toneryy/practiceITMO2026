@@ -152,6 +152,7 @@ export const PlaylistPage = observer(() => {
 								<Track
 									track={track}
 									trackList={tracks}
+									playlistName={playlist.name}
 								/>
 							</div>
 							<button

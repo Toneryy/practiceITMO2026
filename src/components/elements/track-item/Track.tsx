@@ -4,14 +4,19 @@ import type { ITrack } from '@/types/track.types'
 import { transformDuration } from '@/utils/transform-duration'
 import { Heart } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
-import { AddToPlaylist } from './AddToPlaylist'
+import { TrackOptionsMenu } from './TrackOptionsMenu'
 
 interface Props {
 	track: ITrack
 	trackList?: ITrack[]
+	playlistName?: string | null
 }
 
-export const Track = observer(function Track({ track, trackList }: Props) {
+export const Track = observer(function Track({
+	track,
+	trackList,
+	playlistName
+}: Props) {
 	return (
 		<div className="border-b border-player-bg/50 py-7 flex justify-between items-center last:border-0">
 			<TrackInfo
@@ -37,7 +42,7 @@ export const Track = observer(function Track({ track, trackList }: Props) {
 						}
 					/>
 				</button>
-				<AddToPlaylist track={track} />
+				<TrackOptionsMenu track={track} playlistName={playlistName} />
 			</div>
 		</div>
 	)

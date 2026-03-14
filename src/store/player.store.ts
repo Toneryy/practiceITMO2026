@@ -115,6 +115,33 @@ class MusicPlayerStore {
 		this.progress = 0
 		this.isPlaying = true
 	}
+
+	addToQueue(track: ITrack) {
+		if (this.queue.some(t => t.name === track.name)) return
+		this.queue = [...this.queue, track]
+		this.originalQueue = [...this.originalQueue, track]
+	}
+
+	playNext(track: ITrack) {
+		const list = this.queue.length > 0 ? this.queue : TRACKS
+		const currentIndex = list.findIndex(
+			t => t.name === this.currentTrack?.name
+		)
+		const insertIndex = currentIndex === -1 ? 0 : currentIndex + 1
+		const filtered = this.queue.filter(t => t.name !== track.name)
+		const nextQueue = [
+			...filtered.slice(0, insertIndex),
+			track,
+			...filtered.slice(insertIndex)
+		]
+		this.queue = nextQueue
+		const origFiltered = this.originalQueue.filter(t => t.name !== track.name)
+		this.originalQueue = [
+			...origFiltered.slice(0, insertIndex),
+			track,
+			...origFiltered.slice(insertIndex)
+		]
+	}
 }
 
 export const playerStore = new MusicPlayerStore()
