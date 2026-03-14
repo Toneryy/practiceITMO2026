@@ -7,6 +7,11 @@ export class PagesConfig {
 	static RECENTLY_PLAYED = '/recently-played'
 	static LIKED_SONGS = '/liked-songs'
 
+	static LOGIN = '/login'
+	static REGISTER = '/register'
+	static PROFILE = '/profile'
+	static SETTINGS = '/settings'
+
 	static PLAYLIST(id: string) {
 		return `/playlist/${id}`
 	}

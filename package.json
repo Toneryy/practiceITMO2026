@@ -40,13 +40,17 @@
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.6.1",
     "sass": "^1.92.1",
+    "bcryptjs": "^2.4.3",
+    "jsonwebtoken": "^9.0.2",
     "sonner": "^1.7.4",
     "tailwindcss": "^4.1.13"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/jsmediatags": "^3.9.6",
     "@types/node": "^24.3.1",
     "@types/react": "^19.1.10",

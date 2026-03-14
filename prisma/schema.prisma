@@ -9,11 +9,16 @@ datasource db {
 
 model User {
   id        String   @id @default(cuid())
+  username  String   @unique
+  email     String   @unique
+  password  String
+  avatar    String?
   createdAt DateTime @default(now())
 
-  playlists    Playlist[]
-  favorites    UserFavorite[]
+  playlists     Playlist[]
+  favorites     UserFavorite[]
   subscriptions UserSubscription[]
+  listenHistory ListenHistory[]
 }
 
 model Artist {
@@ -55,6 +60,7 @@ model Track {
   lyrics        Lyrics?
   inPlaylists   PlaylistTrack[]
   userFavorites UserFavorite[]
+  listenHistory ListenHistory[]
 }
 
 model Lyrics {
@@ -108,4 +114,16 @@ model UserSubscription {
   artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
 
   @@unique([userId, artistId])
+}
+
+model ListenHistory {
+  id       String   @id @default(cuid())
+  userId   String
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackId  String
+  track    Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  playedAt DateTime @default(now())
+
+  @@index([userId, playedAt])
+  @@index([userId, trackId])
 }

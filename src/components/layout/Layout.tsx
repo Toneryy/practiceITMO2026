@@ -4,6 +4,7 @@ import { playerStore } from '@/store/player.store'
 import { AudioPlayer } from '../elements/player/AudioPlayer'
 import { LeftSidebar } from './left-sidebar/LeftSidebar'
 import { RightSidebar } from './right-sidebar/RightSidebar'
+import { Header } from './Header'
 
 const Layout = observer(function Layout({ children }: PropsWithChildren<unknown>) {
 	return (
@@ -16,7 +17,10 @@ const Layout = observer(function Layout({ children }: PropsWithChildren<unknown>
 				}`}
 			>
 				<LeftSidebar />
-				<main className="scrollbar-custom h-full overflow-y-auto pt-5">{children}</main>
+				<main className="scrollbar-custom flex h-full flex-col overflow-y-auto">
+					<Header />
+					<div className="flex-1 pt-1">{children}</div>
+				</main>
 				{(playerStore.lyricsOpen || playerStore.queueOpen) && <RightSidebar />}
 			</div>
 			<AudioPlayer />

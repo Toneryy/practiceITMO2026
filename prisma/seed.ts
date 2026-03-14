@@ -337,7 +337,12 @@ async function main() {
 	await prisma.user.upsert({
 		where: { id: 'default-user' },
 		update: {},
-		create: { id: 'default-user' }
+		create: {
+			id: 'default-user',
+			username: 'default',
+			email: 'default@itmotify.local',
+			password: '$2a$10$placeholder_hash_for_seed_user_only'
+		}
 	})
 
 	// ── Artists (Deezer → Last.fm → пусто) ──────────────────────────────────

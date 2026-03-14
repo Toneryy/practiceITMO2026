@@ -8,14 +8,21 @@ import { ArtistsPage } from '@/pages/ArtistsPage'
 import { DiscoverPage } from '@/pages/DiscoverPage'
 import { HomePage } from '@/pages/HomePage'
 import { LikedSongsPage } from '@/pages/LikedSongsPage'
+import { LoginPage } from '@/pages/LoginPage'
+import { RegisterPage } from '@/pages/RegisterPage'
+import { ProfilePage } from '@/pages/ProfilePage'
+import { SettingsPage } from '@/pages/SettingsPage'
 import { PlaylistPage } from '@/pages/PlaylistPage'
 import { RecentlyPlayedPage } from '@/pages/RecentlyPlayedPage'
 import { SearchPage } from '@/pages/SearchPage'
 import { catalogStore } from '@/store/catalog.store'
 import { favoriteStore } from '@/store/favorite.store'
 import { subscriptionStore } from '@/store/subscription.store'
+import { initListenHistoryReaction } from '@/store/listen-history.reaction'
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+
+initListenHistoryReaction()
 
 export default function App() {
 	useEffect(() => {
@@ -83,6 +90,22 @@ export default function App() {
 					<Route
 						path="/recently-played"
 						element={<RecentlyPlayedPage />}
+					/>
+					<Route
+						path="/login"
+						element={<LoginPage />}
+					/>
+					<Route
+						path="/register"
+						element={<RegisterPage />}
+					/>
+					<Route
+						path="/profile"
+						element={<ProfilePage />}
+					/>
+					<Route
+						path="/settings"
+						element={<SettingsPage />}
 					/>
 					<Route
 						path="*"

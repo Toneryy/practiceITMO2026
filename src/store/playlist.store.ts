@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from 'mobx'
 import { arrayMove } from '@dnd-kit/sortable'
 import { toast } from 'sonner'
+import { authStore, authFetch } from './auth.store'
 
 export interface IPlaylist {
 	/** Database id — populated after fetchPlaylists resolves. */
@@ -10,12 +11,6 @@ export interface IPlaylist {
 	image?: string
 	pinned?: boolean
 }
-
-// ---------------------------------------------------------------------------
-// Default user id used until real auth is introduced.
-// Kept in one place so it's easy to swap in later.
-// ---------------------------------------------------------------------------
-export const DEFAULT_USER_ID = 'default-user'
 
 class PlaylistStore {
 	playlists: IPlaylist[] = JSON.parse(
@@ -40,11 +35,12 @@ class PlaylistStore {
 	 * Fetches playlists from the backend API and replaces the local list.
 	 * Falls back to localStorage data if the request fails (offline / pre-backend).
 	 */
-	async fetchPlaylists(userId: string = DEFAULT_USER_ID): Promise<void> {
+	async fetchPlaylists(): Promise<void> {
 		this.isLoading = true
 		this.error = null
 		try {
-			const res = await fetch(`/api/playlists?userId=${userId}`)
+			const userId = authStore.userId
+			const res = await authFetch(`/api/playlists?userId=${userId}`)
 			if (!res.ok) throw new Error(`HTTP ${res.status}`)
 			const data: IPlaylist[] = await res.json()
 			runInAction(() => {
