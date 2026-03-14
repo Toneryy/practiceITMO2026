@@ -1,4 +1,3 @@
-import { TRACKS } from '@/data/tracks.data'
 import type { ITrack } from '@/types/track.types'
 import { makeAutoObservable } from 'mobx'
 
@@ -6,7 +5,7 @@ export type RepeatMode = 'none' | 'all' | 'one'
 
 class MusicPlayerStore {
 	isPlaying: boolean = false
-	currentTrack: ITrack | null = TRACKS[0]
+	currentTrack: ITrack | null = null
 	queue: ITrack[] = []
 	originalQueue: ITrack[] = []
 	isShuffle: boolean = false

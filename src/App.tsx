@@ -10,9 +10,19 @@ import { HomePage } from '@/pages/HomePage'
 import { LikedSongsPage } from '@/pages/LikedSongsPage'
 import { PlaylistPage } from '@/pages/PlaylistPage'
 import { RecentlyPlayedPage } from '@/pages/RecentlyPlayedPage'
+import { catalogStore } from '@/store/catalog.store'
+import { favoriteStore } from '@/store/favorite.store'
+import { subscriptionStore } from '@/store/subscription.store'
+import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
 export default function App() {
+	useEffect(() => {
+		catalogStore.fetchAll()
+		favoriteStore.fetchFavorites()
+		subscriptionStore.fetchSubscriptions()
+	}, [])
+
 	return (
 		<BrowserRouter>
 			<FullscreenPlayer />

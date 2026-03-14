@@ -1,7 +1,7 @@
 import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
-import { TRACKS } from '@/data/tracks.data'
 import { useDecodedParam } from '@/hooks/useDecodedParam'
+import { catalogStore } from '@/store/catalog.store'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
@@ -10,7 +10,7 @@ export const AlbumPage = observer(function AlbumPage() {
 	const { t } = useTranslation()
 	const albumName = useDecodedParam('name')
 
-	const albumTracks = TRACKS.filter(track => track.album === albumName)
+	const albumTracks = catalogStore.tracksByAlbum(albumName)
 
 	if (albumTracks.length === 0) {
 		return (

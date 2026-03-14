@@ -1,7 +1,7 @@
 import { ConfirmModal } from '@/components/ui/confirm-modal/ConfirmModal'
 import { CustomMenu } from '@/components/ui/custom-menu/CustomMenu'
 import { PagesConfig } from '@/config/pages.config'
-import { TRACKS } from '@/data/tracks.data'
+import { catalogStore } from '@/store/catalog.store'
 import { playlistStore } from '@/store/playlist.store'
 import { playerStore } from '@/store/player.store'
 import { MoreHorizontal, Pause, Pencil, Pin, Play, Plus, Trash2 } from 'lucide-react'
@@ -66,7 +66,7 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 										src={
 											playlist.image ||
 											(playlist.tracks.length > 0
-												? TRACKS.find(t => t.name === playlist.tracks[0])
+												? catalogStore.tracksByNames([playlist.tracks[0]])[0]
 														?.cover
 												: undefined) ||
 											'https://picsum.photos/seed/playlist/80/80'
@@ -75,9 +75,7 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 										className="h-full w-full object-cover transition group-hover:brightness-75"
 									/>
 									{playlist.tracks.length > 0 && (() => {
-										const tracks = TRACKS.filter(t =>
-											playlist.tracks.includes(t.name)
-										)
+										const tracks = catalogStore.tracksByNames(playlist.tracks)
 										const isPlayingFromPlaylist =
 											playerStore.currentTrack &&
 											playlist.tracks.includes(

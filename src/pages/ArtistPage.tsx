@@ -1,8 +1,7 @@
 import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
-import { ARTISTS } from '@/data/artist.data'
-import { TRACKS } from '@/data/tracks.data'
 import { useDecodedParam } from '@/hooks/useDecodedParam'
+import { catalogStore } from '@/store/catalog.store'
 import { playerStore } from '@/store/player.store'
 import { subscriptionStore } from '@/store/subscription.store'
 import type { ITrack } from '@/types/track.types'
@@ -86,20 +85,13 @@ export const ArtistPage = observer(function ArtistPage() {
 	const optionsMenuRef = useRef<HTMLDivElement>(null)
 	const sortMenuRef = useRef<HTMLDivElement>(null)
 
-	const artist = ARTISTS.find(
-		a => a.name.toLowerCase() === decodedName.toLowerCase()
-	)
+	// Fetch the artist with their tracks from the API
+	useEffect(() => {
+		catalogStore.fetchArtistByName(decodedName)
+	}, [decodedName])
 
-	const topTracks = useMemo(
-		() =>
-			artist
-				? TRACKS.filter(
-						track =>
-							track.artist.name.toLowerCase() === artist.name.toLowerCase()
-					)
-				: [],
-		[artist]
-	)
+	const artist = catalogStore.currentArtist
+	const topTracks = artist?.tracks ?? []
 
 	const sortedTracks = useMemo(
 		() => sortTracks(topTracks, sortBy),
@@ -189,6 +181,22 @@ export const ArtistPage = observer(function ArtistPage() {
 		setOptionsMenuOpen(false)
 	}
 
+	// Loading state
+	if (catalogStore.isLoadingArtist) {
+		return (
+			<PageContainer
+				breadcrumbs={[
+					{ label: t('nav.home'), link: '/' },
+					{ label: t('nav.artists'), link: '/artists' }
+				]}
+			>
+				<div className="flex items-center justify-center py-24">
+					<div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+				</div>
+			</PageContainer>
+		)
+	}
+
 	if (!artist) {
 		return (
 			<PageContainer
@@ -232,8 +240,8 @@ export const ArtistPage = observer(function ArtistPage() {
 				)}
 				<div className="min-w-0 flex-1">
 					<p className="text-sm font-medium uppercase tracking-wide text-neutral-400">
-					{t('artist.type')}
-				</p>
+						{t('artist.type')}
+					</p>
 					<h1 className="text-4xl font-bold sm:text-5xl">{artist.name}</h1>
 					<p className="mt-1 text-sm text-neutral-400">
 						{artist.listenersCount.toLocaleString()} listeners •{' '}
@@ -268,9 +276,9 @@ export const ArtistPage = observer(function ArtistPage() {
 									: 'bg-white/10 text-white hover:bg-white/20'
 							)}
 						>
-					{subscriptionStore.isSubscribed(artist.name)
-							? t('artist.subscribed')
-							: t('artist.subscribe')}
+							{subscriptionStore.isSubscribed(artist.name)
+								? t('artist.subscribed')
+								: t('artist.subscribe')}
 						</button>
 						<div className="flex items-center gap-3">
 							{topTracks.length > 0 && (
@@ -280,12 +288,12 @@ export const ArtistPage = observer(function ArtistPage() {
 										onClick={() =>
 											setSortMenuOpen(prev => !prev)
 										}
-									className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-sm text-white/80 hover:bg-white/20 transition-colors"
-									title={t('artist.sortTitle')}
-								>
-									<ListOrdered size={18} />
-									<span>{t('artist.sort')}</span>
-								</button>
+										className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-sm text-white/80 hover:bg-white/20 transition-colors"
+										title={t('artist.sortTitle')}
+									>
+										<ListOrdered size={18} />
+										<span>{t('artist.sort')}</span>
+									</button>
 									{sortMenuOpen &&
 										sortMenuPosition &&
 										createPortal(
@@ -298,34 +306,34 @@ export const ArtistPage = observer(function ArtistPage() {
 													right: sortMenuPosition.right
 												}}
 											>
-									{SORT_OPTIONS.map(
-												({
-													value,
-													labelKey,
-													icon: Icon
-												}) => (
-													<button
-														key={value}
-														type="button"
-														onClick={() => {
-															setSortBy(value)
-															setSortMenuOpen(false)
-														}}
-														className={cn(
-															'flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm transition-colors',
-															sortBy === value
-																? 'bg-primary/20 text-primary'
-																: 'hover:bg-white/10'
-														)}
-													>
-														<Icon
-															size={16}
-															className="shrink-0 opacity-80"
-														/>
-														{t(labelKey)}
-													</button>
-												)
-											)}
+												{SORT_OPTIONS.map(
+													({
+														value,
+														labelKey,
+														icon: Icon
+													}) => (
+														<button
+															key={value}
+															type="button"
+															onClick={() => {
+																setSortBy(value)
+																setSortMenuOpen(false)
+															}}
+															className={cn(
+																'flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm transition-colors',
+																sortBy === value
+																	? 'bg-primary/20 text-primary'
+																	: 'hover:bg-white/10'
+															)}
+														>
+															<Icon
+																size={16}
+																className="shrink-0 opacity-80"
+															/>
+															{t(labelKey)}
+														</button>
+													)
+												)}
 											</div>,
 											document.body
 										)}
@@ -337,9 +345,9 @@ export const ArtistPage = observer(function ArtistPage() {
 									onClick={() =>
 										setOptionsMenuOpen(prev => !prev)
 									}
-								className="flex items-center justify-center rounded-full bg-white/10 p-2.5 text-white/80 hover:bg-white/20 transition-colors"
-								title={t('artist.artistOptions')}
-								aria-label={t('artist.artistOptions')}
+									className="flex items-center justify-center rounded-full bg-white/10 p-2.5 text-white/80 hover:bg-white/20 transition-colors"
+									title={t('artist.artistOptions')}
+									aria-label={t('artist.artistOptions')}
 								>
 									<MoreHorizontal size={20} />
 								</button>
@@ -359,9 +367,9 @@ export const ArtistPage = observer(function ArtistPage() {
 												onClick={() => handleShareArtist()}
 												className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-white/10"
 											>
-										<Share2 size={16} />
-											{t('artist.share')}
-										</button>
+												<Share2 size={16} />
+												{t('artist.share')}
+											</button>
 										</div>,
 										document.body
 									)}
@@ -371,11 +379,11 @@ export const ArtistPage = observer(function ArtistPage() {
 				</div>
 			</div>
 
-		{/* Top Tracks */}
-		<section>
-			<h2 className="mb-4 text-xl font-bold">{t('artist.topTracks')}</h2>
-			{topTracks.length === 0 ? (
-				<p className="text-neutral-400">{t('artist.noTracks')}</p>
+			{/* Top Tracks */}
+			<section>
+				<h2 className="mb-4 text-xl font-bold">{t('artist.topTracks')}</h2>
+				{topTracks.length === 0 ? (
+					<p className="text-neutral-400">{t('artist.noTracks')}</p>
 				) : (
 					<TrackTable tracks={sortedTracks} />
 				)}

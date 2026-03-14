@@ -1,3 +1,4 @@
+import { ExplicitBadge } from '@/components/ui/explicit-badge/ExplicitBadge'
 import { playerStore } from '@/store/player.store'
 import type { ITrack } from '@/types/track.types'
 import { Pause, Play } from 'lucide-react'
@@ -12,6 +13,7 @@ interface Props {
 	image: string
 	title: string
 	subTitle: string
+	explicit?: boolean
 	track?: ITrack
 	trackList?: ITrack[]
 }
@@ -20,6 +22,7 @@ export const TrackInfo = observer(function TrackInfo({
 	title,
 	subTitle,
 	image,
+	explicit,
 	track,
 	trackList
 }: Props) {
@@ -93,26 +96,27 @@ export const TrackInfo = observer(function TrackInfo({
 				/>
 			)}
 
-			<div>
-				<div
-					className={cn(
-						'text-lg font-medium',
-						isActive ? 'text-primary' : 'text-white'
-					)}
-				>
-					{track ? (
-						<button
-							onClick={handleTitleClick}
-							className="hover:underline"
-						>
-							{title}
-						</button>
-					) : (
-						title
-					)}
-				</div>
-				<div>{subTitle}</div>
+		<div>
+			<div
+				className={cn(
+					'flex items-center gap-1.5 text-lg font-medium',
+					isActive ? 'text-primary' : 'text-white'
+				)}
+			>
+				{track ? (
+					<button
+						onClick={handleTitleClick}
+						className="truncate hover:underline"
+					>
+						{title}
+					</button>
+				) : (
+					<span className="truncate">{title}</span>
+				)}
+				{explicit && <ExplicitBadge />}
 			</div>
+			<div>{subTitle}</div>
+		</div>
 		</div>
 	)
 })

@@ -1,15 +1,13 @@
 import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
-import { TRACKS } from '@/data/tracks.data'
+import { catalogStore } from '@/store/catalog.store'
 import { favoriteStore } from '@/store/favorite.store'
 import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 
 export const LikedSongsPage = observer(() => {
 	const { t } = useTranslation()
-	const likedTracks = TRACKS.filter(track =>
-		favoriteStore.favoritesName.includes(track.name)
-	)
+	const likedTracks = catalogStore.tracksByNames(favoriteStore.favoritesName)
 
 	return (
 		<PageContainer

@@ -1,19 +1,12 @@
 import { AlbumCard } from '@/components/ui/album-card/AlbumCard'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
-import { TRACKS } from '@/data/tracks.data'
+import { catalogStore } from '@/store/catalog.store'
+import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 
-export function AlbumsPage() {
+export const AlbumsPage = observer(function AlbumsPage() {
 	const { t } = useTranslation()
-	const albumsMap = new Map<string, (typeof TRACKS)[number]>()
-
-	TRACKS.forEach(track => {
-		if (!albumsMap.has(track.album)) {
-			albumsMap.set(track.album, track)
-		}
-	})
-
-	const albums = Array.from(albumsMap.entries())
+	const albums = Array.from(catalogStore.albums.entries())
 
 	return (
 		<PageContainer
@@ -35,4 +28,4 @@ export function AlbumsPage() {
 			</div>
 		</PageContainer>
 	)
-}
+})

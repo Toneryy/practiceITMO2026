@@ -1,0 +1,110 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  playlists    Playlist[]
+  favorites    UserFavorite[]
+  subscriptions UserSubscription[]
+}
+
+model Artist {
+  id             String @id @default(cuid())
+  name           String @unique
+  image          String
+  listenersCount Int    @default(0)
+
+  tracks        Track[]
+  albums        Album[]
+  subscriptions UserSubscription[]
+}
+
+model Album {
+  id       String @id @default(cuid())
+  name     String
+  cover    String
+  artistId String
+  artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  tracks Track[]
+
+  @@unique([name, artistId])
+}
+
+model Track {
+  id       String  @id @default(cuid())
+  name     String  @unique
+  file     String
+  cover    String
+  duration Int
+  explicit Boolean @default(false)
+  artistId String
+  artist   Artist  @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  albumId  String?
+  album    Album?  @relation(fields: [albumId], references: [id], onDelete: SetNull)
+
+  lyrics        Lyrics?
+  inPlaylists   PlaylistTrack[]
+  userFavorites UserFavorite[]
+}
+
+model Lyrics {
+  id      String @id @default(cuid())
+  trackId String @unique
+  track   Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  // Stored as JSON string: ILyricsLine[]
+  lines   String
+}
+
+model Playlist {
+  id     String  @id @default(cuid())
+  name   String
+  image  String?
+  pinned Boolean @default(false)
+  order  Int     @default(0)
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  tracks PlaylistTrack[]
+
+  @@unique([name, userId])
+}
+
+model PlaylistTrack {
+  id         String   @id @default(cuid())
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  trackId    String
+  track      Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  order      Int      @default(0)
+
+  @@unique([playlistId, trackId])
+}
+
+model UserFavorite {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trackId String
+  track   Track  @relation(fields: [trackId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, trackId])
+}
+
+model UserSubscription {
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artistId String
+  artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, artistId])
+}

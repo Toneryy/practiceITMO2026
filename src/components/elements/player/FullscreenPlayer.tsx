@@ -1,3 +1,4 @@
+import { ExplicitBadge } from '@/components/ui/explicit-badge/ExplicitBadge'
 import { ProgressBar } from '@/components/ui/progress-bar/ProgressBar'
 import { LYRICS } from '@/data/lyrics.data'
 import { favoriteStore } from '@/store/favorite.store'
@@ -137,7 +138,8 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 						<div className="flex flex-col gap-7">
 							{/* Track info */}
 							<div className="flex items-start justify-between gap-4">
-								<div className="min-w-0">
+						<div className="min-w-0">
+								<div className="flex items-center gap-2">
 									<h1
 										className={cn(
 											'truncate font-bold leading-tight transition-all duration-300',
@@ -146,15 +148,17 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 									>
 										{track.name}
 									</h1>
-									<p
-										className={cn(
-											'mt-1 truncate text-white/60 transition-all duration-300',
-											queueOpen ? 'text-base' : 'text-xl'
-										)}
-									>
-										{track.artist.name}
-									</p>
+									{track.explicit && <ExplicitBadge className="mt-1 shrink-0" />}
 								</div>
+								<p
+									className={cn(
+										'mt-1 truncate text-white/60 transition-all duration-300',
+										queueOpen ? 'text-base' : 'text-xl'
+									)}
+								>
+									{track.artist.name}
+								</p>
+							</div>
 								<button
 									type="button"
 									onClick={() => favoriteStore.toggleFavorite(track.name)}
@@ -296,14 +300,17 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 													className="h-10 w-10 shrink-0 rounded-lg object-cover"
 												/>
 												<div className="min-w-0 flex-1">
-													<p
-														className={cn(
-															'truncate text-sm font-medium',
-															isCurrent ? 'text-primary' : 'text-white'
-														)}
-													>
-														{t.name}
-													</p>
+													<div className="flex items-center gap-1.5">
+														<p
+															className={cn(
+																'truncate text-sm font-medium',
+																isCurrent ? 'text-primary' : 'text-white'
+															)}
+														>
+															{t.name}
+														</p>
+														{t.explicit && <ExplicitBadge />}
+													</div>
 													<p className="truncate text-xs text-white/50">
 														{t.artist.name}
 													</p>
@@ -411,7 +418,8 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 											alt=""
 											className="h-12 w-12 shrink-0 rounded-lg object-cover"
 										/>
-										<div className="min-w-0 flex-1">
+									<div className="min-w-0 flex-1">
+										<div className="flex items-center gap-1.5">
 											<p
 												className={cn(
 													'truncate text-sm font-medium',
@@ -420,13 +428,15 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 											>
 												{t.name}
 											</p>
-											<p className="truncate text-xs text-white/50">
-												{t.artist.name}
-											</p>
-											<p className="text-xs text-white/30 tabular-nums">
-												{transformDuration(t.duration)}
-											</p>
+											{t.explicit && <ExplicitBadge />}
 										</div>
+										<p className="truncate text-xs text-white/50">
+											{t.artist.name}
+										</p>
+										<p className="text-xs text-white/30 tabular-nums">
+											{transformDuration(t.duration)}
+										</p>
+									</div>
 									</button>
 								)
 							})}

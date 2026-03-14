@@ -1,12 +1,21 @@
-import { makeAutoObservable } from 'mobx'
+import { makeAutoObservable, runInAction } from 'mobx'
 import { arrayMove } from '@dnd-kit/sortable'
 import { toast } from 'sonner'
 
 export interface IPlaylist {
+	/** Database id — populated after fetchPlaylists resolves. */
+	id?: string
 	name: string
 	tracks: string[]
 	image?: string
+	pinned?: boolean
 }
+
+// ---------------------------------------------------------------------------
+// Default user id used until real auth is introduced.
+// Kept in one place so it's easy to swap in later.
+// ---------------------------------------------------------------------------
+export const DEFAULT_USER_ID = 'default-user'
 
 class PlaylistStore {
 	playlists: IPlaylist[] = JSON.parse(
@@ -16,9 +25,45 @@ class PlaylistStore {
 		localStorage.getItem('playlists-pinned') || '[]'
 	)
 
+	isLoading: boolean = false
+	error: string | null = null
+
 	constructor() {
 		makeAutoObservable(this)
 	}
+
+	// -------------------------------------------------------------------------
+	// Async: load from backend
+	// -------------------------------------------------------------------------
+
+	/**
+	 * Fetches playlists from the backend API and replaces the local list.
+	 * Falls back to localStorage data if the request fails (offline / pre-backend).
+	 */
+	async fetchPlaylists(userId: string = DEFAULT_USER_ID): Promise<void> {
+		this.isLoading = true
+		this.error = null
+		try {
+			const res = await fetch(`/api/playlists?userId=${userId}`)
+			if (!res.ok) throw new Error(`HTTP ${res.status}`)
+			const data: IPlaylist[] = await res.json()
+			runInAction(() => {
+				this.playlists = data
+				this.pinnedNames = data.filter(p => p.pinned).map(p => p.name)
+				this.isLoading = false
+			})
+		} catch (err) {
+			runInAction(() => {
+				this.isLoading = false
+				this.error = err instanceof Error ? err.message : 'Unknown error'
+			})
+			// Leave playlists unchanged (localStorage fallback stays intact).
+		}
+	}
+
+	// -------------------------------------------------------------------------
+	// Synchronous helpers (localStorage — kept as fallback until API is wired)
+	// -------------------------------------------------------------------------
 
 	private saveToLocalStorage() {
 		localStorage.setItem('playlists', JSON.stringify(this.playlists))
@@ -68,6 +113,9 @@ class PlaylistStore {
 		} else {
 			this.pinnedNames.splice(idx, 1)
 		}
+		// Mirror pinned flag on the playlist object itself (used by API layer).
+		const playlist = this.playlists.find(p => p.name === name)
+		if (playlist) playlist.pinned = idx === -1
 		this.saveToLocalStorage()
 	}
 

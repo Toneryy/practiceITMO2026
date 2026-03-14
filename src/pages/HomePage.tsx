@@ -2,8 +2,7 @@ import { SearchField } from '@/components/elements/search-field/SearchField'
 import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { ArtistCard } from '@/components/ui/artist-card/ArtistCard'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
-import { ARTISTS } from '@/data/artist.data'
-import { TRACKS } from '@/data/tracks.data'
+import { catalogStore } from '@/store/catalog.store'
 import { Play } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useQueryState } from 'nuqs'
@@ -22,19 +21,21 @@ export const HomePage = observer(function HomePage() {
 		setInputValue(searchTerm ?? '')
 	}, [searchTerm])
 
-	const filteredTracks = useMemo(() => {
-		const term = inputValue.trim().toLowerCase()
-		if (!term) return TRACKS
+	// Fetch catalog on first mount if not yet loaded
+	useEffect(() => {
+		if (catalogStore.tracks.length === 0) catalogStore.fetchTracks()
+		if (catalogStore.artists.length === 0) catalogStore.fetchArtists()
+	}, [])
 
-		return TRACKS.filter(
-			track =>
-				track.name.toLowerCase().includes(term) ||
-				track.artist.name.toLowerCase().includes(term)
-		)
-	}, [inputValue])
+	const filteredTracks = useMemo(
+		() => catalogStore.filterTracks(inputValue),
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+		[inputValue, catalogStore.tracks]
+	)
 
-	const popularTracks = TRACKS.slice(0, POPULAR_LIMIT)
-	const featuredArtists = ARTISTS.slice(0, ARTISTS_LIMIT)
+	const popularTracks = catalogStore.tracks.slice(0, POPULAR_LIMIT)
+	const featuredArtists = catalogStore.artists.slice(0, ARTISTS_LIMIT)
+	const isLoading = catalogStore.isLoadingTracks || catalogStore.isLoadingArtists
 
 	return (
 		<PageContainer>
@@ -69,29 +70,37 @@ export const HomePage = observer(function HomePage() {
 				</button>
 			</div>
 
-		<section className="mt-8">
-			<h2 className="text-xl font-bold mb-4">{t('home.popularTracks')}</h2>
-			<TrackTable tracks={popularTracks} />
-		</section>
-
-		<section className="mt-10">
-			<h2 className="text-xl font-bold mb-4">{t('home.artists')}</h2>
-			<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
-				{featuredArtists.map(artist => (
-					<ArtistCard
-						key={artist.name}
-						artist={artist}
-					/>
-				))}
-			</div>
-		</section>
-
-		<section className="mt-10">
-			<h2 className="text-xl font-bold mb-4">{t('home.allTracks')}</h2>
-				<div className="mt-5">
-					<TrackTable tracks={filteredTracks} />
+			{isLoading ? (
+				<div className="mt-10 flex items-center justify-center py-16">
+					<div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
 				</div>
-			</section>
+			) : (
+				<>
+					<section className="mt-8">
+						<h2 className="text-xl font-bold mb-4">{t('home.popularTracks')}</h2>
+						<TrackTable tracks={popularTracks} />
+					</section>
+
+					<section className="mt-10">
+						<h2 className="text-xl font-bold mb-4">{t('home.artists')}</h2>
+						<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+							{featuredArtists.map(artist => (
+								<ArtistCard
+									key={artist.name}
+									artist={artist}
+								/>
+							))}
+						</div>
+					</section>
+
+					<section className="mt-10">
+						<h2 className="text-xl font-bold mb-4">{t('home.allTracks')}</h2>
+						<div className="mt-5">
+							<TrackTable tracks={filteredTracks} />
+						</div>
+					</section>
+				</>
+			)}
 		</PageContainer>
 	)
 })

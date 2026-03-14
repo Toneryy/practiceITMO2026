@@ -1,7 +1,7 @@
 import { TrackTable } from '@/components/elements/track-table/TrackTable'
 import { ConfirmModal } from '@/components/ui/confirm-modal/ConfirmModal'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
-import { TRACKS } from '@/data/tracks.data'
+import { catalogStore } from '@/store/catalog.store'
 import { playlistStore } from '@/store/playlist.store'
 import { playerStore } from '@/store/player.store'
 import type { ITrack } from '@/types/track.types'
@@ -153,9 +153,7 @@ export const PlaylistPage = observer(() => {
 		)
 	}
 
-	const tracks = playlist.tracks
-		.map(trackName => TRACKS.find(track => track.name === trackName))
-		.filter((track): track is (typeof TRACKS)[number] => Boolean(track))
+	const tracks = catalogStore.tracksByNames(playlist.tracks)
 	const sortedTracks = useMemo(() => sortTracks(tracks, sortBy), [tracks, sortBy])
 	const totalDurationSec = tracks.reduce((sum, t) => sum + t.duration, 0)
 	const canReorder = sortBy === 'default' || sortBy === 'date-asc' || sortBy === 'date-desc'

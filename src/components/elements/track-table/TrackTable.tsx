@@ -1,4 +1,5 @@
 import { TrackOptionsMenu } from '@/components/elements/track-item/TrackOptionsMenu'
+import { ExplicitBadge } from '@/components/ui/explicit-badge/ExplicitBadge'
 import { PagesConfig } from '@/config/pages.config'
 import { favoriteStore } from '@/store/favorite.store'
 import { playerStore } from '@/store/player.store'
@@ -228,16 +229,19 @@ const TrackTableRow = observer(function TrackTableRow({
 						className="h-10 w-10 shrink-0 rounded object-cover"
 					/>
 					<div className="min-w-0">
-						<Link
-							to={PagesConfig.ALBUMS(encodeURIComponent(track.album))}
-							onClick={e => e.stopPropagation()}
-							className={cn(
-								'truncate block text-left font-medium hover:underline',
-								isActive ? 'text-primary' : 'text-white'
-							)}
-						>
-							{track.name}
-						</Link>
+						<div className="flex items-center gap-1.5">
+							<Link
+								to={PagesConfig.ALBUMS(encodeURIComponent(track.album))}
+								onClick={e => e.stopPropagation()}
+								className={cn(
+									'truncate block text-left font-medium hover:underline',
+									isActive ? 'text-primary' : 'text-white'
+								)}
+							>
+								{track.name}
+							</Link>
+							{track.explicit && <ExplicitBadge />}
+						</div>
 						<Link
 							to={PagesConfig.ARTISTS(encodeURIComponent(track.artist.name))}
 							onClick={e => e.stopPropagation()}

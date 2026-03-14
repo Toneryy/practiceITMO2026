@@ -1,9 +1,10 @@
 import { ArtistCard } from '@/components/ui/artist-card/ArtistCard'
 import { PageContainer } from '@/components/ui/page-container/PageContainer'
-import { ARTISTS } from '@/data/artist.data'
+import { catalogStore } from '@/store/catalog.store'
+import { observer } from 'mobx-react-lite'
 import { useTranslation } from 'react-i18next'
 
-export function ArtistsPage() {
+export const ArtistsPage = observer(function ArtistsPage() {
 	const { t } = useTranslation()
 
 	return (
@@ -15,7 +16,7 @@ export function ArtistsPage() {
 			]}
 		>
 			<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
-				{ARTISTS.map(artist => (
+				{catalogStore.artists.map(artist => (
 					<ArtistCard
 						key={artist.name}
 						artist={artist}
@@ -24,4 +25,4 @@ export function ArtistsPage() {
 			</div>
 		</PageContainer>
 	)
-}
+})
