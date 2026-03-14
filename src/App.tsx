@@ -1,62 +1,62 @@
-import { Play } from 'lucide-react'
-import { useQueryState } from 'nuqs'
-import { useMemo } from 'react'
-import { SearchField } from './components/elements/search-field/SearchField'
-import { Track } from './components/elements/track-item/Track'
-import { TRACKS } from './data/tracks.data'
+import Layout from '@/components/layout/Layout'
+import { AlbumPage } from '@/pages/AlbumPage'
+import { AlbumsPage } from '@/pages/AlbumsPage'
+import { ArtistPage } from '@/pages/ArtistPage'
+import { ArtistsPage } from '@/pages/ArtistsPage'
+import { DiscoverPage } from '@/pages/DiscoverPage'
+import { HomePage } from '@/pages/HomePage'
+import { LikedSongsPage } from '@/pages/LikedSongsPage'
+import { PlaylistPage } from '@/pages/PlaylistPage'
+import { RecentlyPlayedPage } from '@/pages/RecentlyPlayedPage'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 
-function App() {
-	const [searchTerm, setSearchTerm] = useQueryState('q')
-
-	const filteredTracks = useMemo(() => {
-		if (!searchTerm) return TRACKS
-
-		return TRACKS.filter(track =>
-			track.name.toLowerCase().includes(searchTerm.toLowerCase())
-		)
-	}, [searchTerm])
-
+export default function App() {
 	return (
-		<div>
-			<SearchField
-				value={searchTerm || ''}
-				onChange={e => setSearchTerm(e.target.value)}
-			/>
-
-			<div className="relative">
-				<img
-					src="/banner.jpg"
-					alt=""
-					className="rounded-xl"
-				/>
-
-				<div className="flex items-center justify-between absolute bottom-layout left-0 w-full px-layout">
-					<div>
-						<h1 className="text-2xl font-semibold mb-[0.18rem] text-white">
-							Daft Punk
-						</h1>
-						<h2 className="text-primary font-medium">6.8m listeners</h2>
-					</div>
-
-					<button className="rounded-full bg-gradient-to-r from-[#2F3034] to-[#1F2026] p-5 border border-player-bg border-solid duration-300 hover:translate-y-[-2px] hover:shadow">
-						<Play
-							className="text-primary"
-							fill="var(--color-primary)"
-						/>
-					</button>
-				</div>
-			</div>
-
-			<div className="mt-5">
-				{filteredTracks.map(track => (
-					<Track
-						key={track.name}
-						track={track}
+		<BrowserRouter>
+			<Layout>
+				<Routes>
+					<Route
+						path="/"
+						element={<HomePage />}
 					/>
-				))}
-			</div>
-		</div>
+					<Route
+						path="/discover"
+						element={<DiscoverPage />}
+					/>
+					<Route
+						path="/liked-songs"
+						element={<LikedSongsPage />}
+					/>
+					<Route
+						path="/playlist/:id"
+						element={<PlaylistPage />}
+					/>
+					<Route
+						path="/artists"
+						element={<ArtistsPage />}
+					/>
+					<Route
+						path="/artists/:name"
+						element={<ArtistPage />}
+					/>
+					<Route
+						path="/albums"
+						element={<AlbumsPage />}
+					/>
+					<Route
+						path="/albums/:name"
+						element={<AlbumPage />}
+					/>
+					<Route
+						path="/recently-played"
+						element={<RecentlyPlayedPage />}
+					/>
+					<Route
+						path="*"
+						element={<Navigate to="/" replace />}
+					/>
+				</Routes>
+			</Layout>
+		</BrowserRouter>
 	)
 }
-
-export default App

@@ -3,13 +3,15 @@ import { favoriteStore } from '@/store/favorite.store'
 import type { ITrack } from '@/types/track.types'
 import { transformDuration } from '@/utils/transform-duration'
 import { Heart } from 'lucide-react'
+import { observer } from 'mobx-react-lite'
 import { AddToPlaylist } from './AddToPlaylist'
 
 interface Props {
 	track: ITrack
+	trackList?: ITrack[]
 }
 
-export function Track({ track }: Props) {
+export const Track = observer(function Track({ track, trackList }: Props) {
 	return (
 		<div className="border-b border-player-bg/50 py-7 flex justify-between items-center last:border-0">
 			<TrackInfo
@@ -17,6 +19,7 @@ export function Track({ track }: Props) {
 				subTitle={transformDuration(track.duration)}
 				image={track.cover}
 				track={track}
+				trackList={trackList}
 			/>
 
 			<div className="flex items-center gap-4">
@@ -38,4 +41,4 @@ export function Track({ track }: Props) {
 			</div>
 		</div>
 	)
-}
+})

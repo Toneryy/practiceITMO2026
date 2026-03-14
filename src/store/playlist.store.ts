@@ -20,6 +20,11 @@ class PlaylistStore {
 		this.saveToLocalStorage()
 	}
 
+	deletePlaylist(name: string) {
+		this.playlists = this.playlists.filter(p => p.name !== name)
+		this.saveToLocalStorage()
+	}
+
 	toggleTrackInPlaylist(playlistName: string, trackName: string) {
 		const playlist = this.playlists.find(p => p.name === playlistName)
 		if (!playlist) return

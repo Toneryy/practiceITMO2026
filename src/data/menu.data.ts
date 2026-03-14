@@ -1,5 +1,5 @@
 import type { IMenuItem } from '@/types/menu.types'
-import { Compass, Home, Radio } from 'lucide-react'
+import { Compass, Disc3, Heart, Home, Music2 } from 'lucide-react'
 import { PagesConfig } from '../config/pages.config'
 
 export const MENU_ITEMS: IMenuItem[] = [
@@ -11,12 +11,22 @@ export const MENU_ITEMS: IMenuItem[] = [
 	{
 		icon: Compass,
 		name: 'Discover',
-		link: PagesConfig.DISCOVER
+		link: '/discover'
 	},
 	{
-		icon: Radio,
-		name: 'Radio',
-		link: PagesConfig.RADIO
+		icon: Music2,
+		name: 'Artists',
+		link: PagesConfig.ARTISTS()
+	},
+	{
+		icon: Heart,
+		name: 'Liked Songs',
+		link: PagesConfig.LIKED_SONGS
+	},
+	{
+		icon: Disc3,
+		name: 'Albums',
+		link: '/albums'
 	}
 ]
 
@@ -28,21 +38,5 @@ export const LIBRARY_MENU_ITEMS: IMenuItem[] = [
 	{
 		name: 'Recently Played',
 		link: PagesConfig.RECENTLY_PLAYED
-	},
-	{
-		name: 'Liked Songs',
-		link: PagesConfig.LIKED_SONGS
-	},
-	{
-		name: 'Albums',
-		link: PagesConfig.ALBUMS()
-	},
-	{
-		name: 'Artists',
-		link: PagesConfig.ARTISTS()
-	},
-	{
-		name: 'Podcasts',
-		link: PagesConfig.PODCASTS()
 	}
 ]

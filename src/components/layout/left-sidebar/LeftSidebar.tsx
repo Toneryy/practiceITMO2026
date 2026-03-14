@@ -12,6 +12,7 @@ export function LeftSidebar() {
 			<Menu
 				items={LIBRARY_MENU_ITEMS}
 				title="Your Library"
+				activeHighlight
 			/>
 
 			<hr className="my-8 border-player-bg" />
