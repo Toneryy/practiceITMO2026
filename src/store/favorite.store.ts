@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx'
+import { toast } from 'sonner'
 
 class FavoriteStore {
 	favoritesName: string[] = JSON.parse(
@@ -10,13 +11,14 @@ class FavoriteStore {
 	}
 
 	toggleFavorite(trackName: string) {
-		if (this.favoritesName.includes(trackName)) {
+		const wasIn = this.favoritesName.includes(trackName)
+		if (wasIn) {
 			this.favoritesName = this.favoritesName.filter(name => name !== trackName)
 		} else {
 			this.favoritesName.push(trackName)
 		}
-
 		localStorage.setItem('favorites', JSON.stringify(this.favoritesName))
+		toast.success(wasIn ? 'Removed from Favorites' : 'Added to Favorites')
 	}
 }
 

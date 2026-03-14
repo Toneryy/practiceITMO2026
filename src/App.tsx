@@ -1,5 +1,6 @@
 import Layout from '@/components/layout/Layout'
 import { AlbumPage } from '@/pages/AlbumPage'
+import { Toaster } from 'sonner'
 import { AlbumsPage } from '@/pages/AlbumsPage'
 import { ArtistPage } from '@/pages/ArtistPage'
 import { ArtistsPage } from '@/pages/ArtistsPage'
@@ -13,6 +14,20 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 export default function App() {
 	return (
 		<BrowserRouter>
+			<Toaster
+				closeButton
+				position="bottom-right"
+				theme="dark"
+				toastOptions={{
+					className: 'sonner-toast-custom',
+					duration: 3000,
+					style: {
+						background: '#2B2B30',
+						color: '#fff',
+						borderRadius: '0.5rem'
+					}
+				}}
+			/>
 			<Layout>
 				<Routes>
 					<Route

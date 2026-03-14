@@ -19,6 +19,7 @@ import {
 import { observer } from 'mobx-react-lite'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import cn from 'clsx'
 
@@ -86,6 +87,7 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 	const handleShare = async () => {
 		try {
 			await navigator.clipboard.writeText(window.location.href)
+			toast.success('Link copied to clipboard')
 		} catch {
 			// clipboard unavailable
 		}
@@ -127,6 +129,14 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 							className={menuItemClass}
 							onClick={() => {
 								playerStore.addToQueue(track)
+								toast('Added to queue', {
+									icon: (
+										<ListMusic
+											size={18}
+											style={{ color: 'var(--color-primary)' }}
+										/>
+									)
+								})
 								close()
 							}}
 						>
@@ -138,6 +148,7 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 							className={menuItemClass}
 							onClick={() => {
 								playerStore.playNext(track)
+								toast('Will play next')
 								close()
 							}}
 						>

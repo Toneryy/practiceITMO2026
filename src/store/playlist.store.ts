@@ -1,4 +1,5 @@
 import { makeAutoObservable } from 'mobx'
+import { toast } from 'sonner'
 
 class PlaylistStore {
 	playlists: { name: string; tracks: string[] }[] = JSON.parse(
@@ -21,6 +22,7 @@ class PlaylistStore {
 		if (this.playlists.find(playlist => playlist.name === name)) return
 		this.playlists.push({ name, tracks: [] })
 		this.saveToLocalStorage()
+		toast.success('Playlist created')
 	}
 
 	renamePlaylist(oldName: string, newName: string) {
@@ -41,6 +43,7 @@ class PlaylistStore {
 		this.playlists = this.playlists.filter(p => p.name !== name)
 		this.pinnedNames = this.pinnedNames.filter(n => n !== name)
 		this.saveToLocalStorage()
+		toast.success('Playlist deleted')
 	}
 
 	togglePinned(name: string) {
@@ -71,13 +74,18 @@ class PlaylistStore {
 	toggleTrackInPlaylist(playlistName: string, trackName: string) {
 		const playlist = this.playlists.find(p => p.name === playlistName)
 		if (!playlist) return
-		if (playlist.tracks.includes(trackName)) {
+		const wasIn = playlist.tracks.includes(trackName)
+		if (wasIn) {
 			playlist.tracks = playlist.tracks.filter(name => name !== trackName)
 		} else {
 			playlist.tracks.push(trackName)
 		}
-
 		this.saveToLocalStorage()
+		toast.success(
+			wasIn
+				? `Track removed from ${playlistName}`
+				: `Track added to ${playlistName}`
+		)
 	}
 
 	isTrackInPlaylist(playlistName: string, trackName: string) {
