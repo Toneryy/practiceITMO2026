@@ -2,7 +2,7 @@ import { ConfirmModal } from '@/components/ui/confirm-modal/ConfirmModal'
 import { CustomMenu } from '@/components/ui/custom-menu/CustomMenu'
 import { PagesConfig } from '@/config/pages.config'
 import { playlistStore } from '@/store/playlist.store'
-import { MoreHorizontal, Plus, Trash2 } from 'lucide-react'
+import { MoreHorizontal, Pencil, Pin, Plus, Trash2 } from 'lucide-react'
 import { observer } from 'mobx-react-lite'
 import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
@@ -14,48 +14,67 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 		null
 	)
 	const [playlistToDelete, setPlaylistToDelete] = useState<string | null>(null)
+	const [renamingPlaylist, setRenamingPlaylist] = useState<string | null>(null)
+	const [renameValue, setRenameValue] = useState('')
 	const containerRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
-		if (!isShow && !optionsMenuPlaylist) return
+		if (!isShow && !optionsMenuPlaylist && !renamingPlaylist) return
 
 		const handleMouseDown = (e: MouseEvent) => {
 			if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
 				setIsShow(false)
 				setValue('')
 				setOptionsMenuPlaylist(null)
+				setRenamingPlaylist(null)
+				setRenameValue('')
 			}
 		}
 
 		document.addEventListener('mousedown', handleMouseDown)
 		return () => document.removeEventListener('mousedown', handleMouseDown)
-	}, [isShow, optionsMenuPlaylist])
+	}, [isShow, optionsMenuPlaylist, renamingPlaylist])
 
 	return (
 		<div ref={containerRef}>
 			<div className="text-xs uppercase text-neutral-500 mb-3">Playlists</div>
-			{playlistStore.playlists.length === 0 ? (
+			{playlistStore.sortedPlaylists.length === 0 ? (
 				<div className="text-neutral-400 text-sm mb-5">No playlists yet</div>
 			) : (
 				<ul className="mb-5">
-					{playlistStore.playlists.map(playlist => (
+					{playlistStore.sortedPlaylists.map(playlist => (
 						<li
 							key={playlist.name}
-							className="group flex items-center gap-1 mb-5"
+							className="group flex items-center gap-2 mb-5"
 						>
 							<NavLink
 								to={PagesConfig.PLAYLIST(encodeURIComponent(playlist.name))}
 								className={({ isActive }) =>
-									`flex-1 min-w-0 truncate rounded-md py-1.5 px-2 -mx-2 transition ${
+									`flex flex-1 min-w-0 items-center gap-2 rounded-md py-1.5 px-2 -mx-2 transition ${
 										isActive
 											? 'bg-white/10 text-white font-semibold'
 											: 'text-neutral-400 hover:bg-white/5 hover:text-white'
 									}`
 								}
 							>
-								<span className="group-hover:text-primary duration-300 font-medium block truncate">
-									{playlist.name}
-								</span>
+								<div className="h-10 w-10 shrink-0 overflow-hidden rounded bg-gradient-to-br from-zinc-600 to-zinc-800">
+									<img
+										src="https://picsum.photos/seed/playlist/80/80"
+										alt=""
+										className="h-full w-full object-cover"
+									/>
+								</div>
+								<div className="flex min-w-0 flex-1 flex-col gap-0.5">
+									<span className="group-hover:text-primary truncate font-medium duration-300">
+										{playlist.name}
+									</span>
+									<span className="flex items-center gap-1.5 text-xs text-neutral-500">
+										{playlistStore.isPinned(playlist.name) && (
+											<Pin size={12} className="shrink-0 text-primary" />
+										)}
+										Плейлист · {playlist.tracks.length}
+									</span>
+								</div>
 							</NavLink>
 							<div className="relative shrink-0">
 								<button
@@ -73,6 +92,30 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 								</button>
 								{optionsMenuPlaylist === playlist.name && (
 									<CustomMenu side="right">
+										<button
+											type="button"
+											onClick={() => {
+												setOptionsMenuPlaylist(null)
+												setRenamingPlaylist(playlist.name)
+												setRenameValue(playlist.name)
+											}}
+											className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-white/10"
+										>
+											<Pencil size={16} />
+											Rename
+										</button>
+										<button
+											type="button"
+											onClick={() => {
+												playlistStore.togglePinned(playlist.name)
+											}}
+											className={`flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-white/10 ${playlistStore.isPinned(playlist.name) ? 'text-primary' : ''}`}
+										>
+											<Pin size={16} />
+											{playlistStore.isPinned(playlist.name)
+												? 'Unpin'
+												: 'Pin to top'}
+										</button>
 										<button
 											type="button"
 											onClick={() => {
@@ -119,6 +162,30 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 					</CustomMenu>
 				)}
 			</div>
+
+			{renamingPlaylist && (
+				<div className="mt-2">
+					<input
+						autoFocus
+						type="text"
+						placeholder="New name"
+						value={renameValue}
+						onChange={e => setRenameValue(e.target.value)}
+						onKeyDown={e => {
+							if (e.key === 'Enter' && renameValue.trim()) {
+								playlistStore.renamePlaylist(renamingPlaylist, renameValue.trim())
+								setRenamingPlaylist(null)
+								setRenameValue('')
+							}
+							if (e.key === 'Escape') {
+								setRenamingPlaylist(null)
+								setRenameValue('')
+							}
+						}}
+						className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm focus:border-primary focus:outline-none"
+					/>
+				</div>
+			)}
 
 			{playlistToDelete && (
 				<ConfirmModal

@@ -4,7 +4,7 @@ import { SidebarPlaylists } from './SidebarPlaylists'
 
 export function LeftSidebar() {
 	return (
-		<aside className="px-layout border-r border-player-bg h-full py-9">
+		<aside className="scrollbar-custom h-full overflow-y-auto border-r border-player-bg px-layout py-9">
 			<Menu items={MENU_ITEMS} />
 
 			<hr className="my-8 border-player-bg" />
