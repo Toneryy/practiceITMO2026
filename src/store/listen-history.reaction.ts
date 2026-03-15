@@ -2,7 +2,7 @@ import { reaction } from 'mobx'
 import { playerStore } from './player.store'
 import { authStore, authFetch } from './auth.store'
 
-const LISTEN_THRESHOLD_MS = 30_000
+const LISTEN_THRESHOLD_MS = 300
 
 let listenTimer: ReturnType<typeof setTimeout> | null = null
 

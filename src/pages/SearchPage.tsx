@@ -23,7 +23,8 @@ function scoreTrack(track: ITrack, q: string): number {
 	if (name.includes(q)) return 65
 	if (artist === q) return 55
 	if (artist.startsWith(q)) return 45
-	return 30
+	if (artist.includes(q)) return 25
+	return 0
 }
 
 function scoreArtist(artist: IArtist, q: string): number {

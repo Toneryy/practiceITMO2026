@@ -14,6 +14,7 @@ import {
 	ImagePlus,
 	ListOrdered,
 	MoreHorizontal,
+	Pencil,
 	Play,
 	Share2,
 	Shuffle,
@@ -76,6 +77,8 @@ export const PlaylistPage = observer(() => {
 	const navigate = useNavigate()
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false)
 	const [optionsMenuOpen, setOptionsMenuOpen] = useState(false)
+	const [isRenaming, setIsRenaming] = useState(false)
+	const [renameValue, setRenameValue] = useState('')
 	const [optionsMenuPosition, setOptionsMenuPosition] = useState<{
 		top: number
 		right: number
@@ -87,8 +90,13 @@ export const PlaylistPage = observer(() => {
 	} | null>(null)
 	const [sortBy, setSortBy] = useState<SortOption>('default')
 	const coverInputRef = useRef<HTMLInputElement>(null)
+	const renameInputRef = useRef<HTMLInputElement>(null)
 	const optionsMenuRef = useRef<HTMLDivElement>(null)
 	const sortMenuRef = useRef<HTMLDivElement>(null)
+
+	useEffect(() => {
+		if (isRenaming) renameInputRef.current?.focus()
+	}, [isRenaming])
 
 	useLayoutEffect(() => {
 		if (!optionsMenuOpen || !optionsMenuRef.current) return
@@ -126,18 +134,23 @@ export const PlaylistPage = observer(() => {
 	useEffect(() => {
 		if (!optionsMenuOpen) return
 		const handleMouseDown = (e: MouseEvent) => {
-			if (
-				optionsMenuRef.current &&
-				!optionsMenuRef.current.contains(e.target as Node)
-			) {
-				setOptionsMenuOpen(false)
-			}
+			const target = e.target as Node
+			const inTrigger = optionsMenuRef.current?.contains(target)
+			const inMenu = (target as Element).closest?.('[data-playlist-options-menu]')
+			if (!inTrigger && !inMenu) setOptionsMenuOpen(false)
 		}
 		document.addEventListener('mousedown', handleMouseDown)
 		return () => document.removeEventListener('mousedown', handleMouseDown)
 	}, [optionsMenuOpen])
 
 	const playlist = playlistStore.playlists.find(p => p.name === id)
+
+	// Redirect to home if playlist was deleted (e.g. from sidebar) while viewing its page
+	useEffect(() => {
+		if (!id) return
+		if (playlistStore.isLoading) return
+		if (!playlist) navigate('/', { replace: true })
+	}, [id, playlist, playlistStore.isLoading, navigate])
 
 	// Hooks must run unconditionally — derive from playlist safely with fallbacks
 	const tracks = playlist ? catalogStore.tracksByNames(playlist.tracks) : []
@@ -146,17 +159,11 @@ export const PlaylistPage = observer(() => {
 	const canReorder = sortBy === 'default' || sortBy === 'date-asc' || sortBy === 'date-desc'
 
 	if (!playlist) {
-		return (
-			<div className="p-6">
-				<h1 className="text-2xl font-bold mb-4">{t('playlist.notFound')}</h1>
-				<Link
-					to="/"
-					className="text-primary hover:underline"
-				>
-					{t('playlist.backToHome')}
-				</Link>
+		return playlistStore.isLoading ? (
+			<div className="flex justify-center py-16">
+				<div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
 			</div>
-		)
+		) : null
 	}
 
 	const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -189,6 +196,34 @@ export const PlaylistPage = observer(() => {
 		playlistStore.deletePlaylist(playlist.name)
 		setDeleteModalOpen(false)
 		navigate('/')
+	}
+
+	const handleStartRename = () => {
+		setRenameValue(playlist?.name ?? '')
+		setIsRenaming(true)
+		setOptionsMenuOpen(false)
+	}
+
+	const handleSaveRename = () => {
+		const trimmed = renameValue.trim()
+		if (!playlist || !trimmed || trimmed === playlist.name) {
+			setIsRenaming(false)
+			return
+		}
+		if (playlistStore.playlists.some(p => p.name === trimmed && p.name !== playlist.name)) {
+			toast.error(t('playlist.renameError'))
+			return
+		}
+		playlistStore.renamePlaylist(playlist.name, trimmed)
+		setIsRenaming(false)
+		setRenameValue('')
+		toast.success(t('sidebar.rename'))
+		navigate(`/playlist/${encodeURIComponent(trimmed)}`, { replace: true })
+	}
+
+	const handleCancelRename = () => {
+		setIsRenaming(false)
+		setRenameValue('')
 	}
 
 	const handleSharePlaylist = async () => {
@@ -255,7 +290,33 @@ export const PlaylistPage = observer(() => {
 						</span>
 					</button>
 					<div className="min-w-0 flex-1">
-						<h1 className="text-3xl font-bold mb-2">{playlist.name}</h1>
+						{isRenaming ? (
+							<div className="mb-2">
+								<input
+									ref={renameInputRef}
+									type="text"
+									value={renameValue}
+									onChange={e => setRenameValue(e.target.value)}
+									onKeyDown={e => {
+										if (e.key === 'Enter') handleSaveRename()
+										if (e.key === 'Escape') handleCancelRename()
+									}}
+									onBlur={handleSaveRename}
+									className="w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-2xl font-bold text-white outline-none focus:border-primary"
+								/>
+							</div>
+						) : (
+							<div
+								className="group/title flex cursor-pointer items-center gap-2 rounded-lg py-1 pr-2 -ml-2 hover:bg-white/5 transition-colors"
+								onClick={handleStartRename}
+							>
+								<h1 className="text-3xl font-bold">{playlist.name}</h1>
+								<Pencil
+									size={18}
+									className="shrink-0 text-white/40 opacity-0 transition-opacity group-hover/title:opacity-100"
+								/>
+							</div>
+						)}
 					<div className="text-neutral-400 text-sm mt-1 mb-6">
 						{t('playlist.tracksCount', { count: tracks.length })} • {formatTotalDuration(totalDurationSec)}
 					</div>
@@ -365,27 +426,37 @@ export const PlaylistPage = observer(() => {
 													right: optionsMenuPosition.right
 												}}
 											>
-												<button
+								<button
 													type="button"
 													onClick={() => {
 														handleSharePlaylist()
 													}}
 													className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-white/10"
 												>
-											<Share2 size={16} />
-											{t('playlist.share')}
-										</button>
-										<button
-											type="button"
-											onClick={() => {
-												setOptionsMenuOpen(false)
-												setDeleteModalOpen(true)
-											}}
-											className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm text-red-400 hover:bg-white/10"
-										>
-											<Trash2 size={16} />
-											{t('playlist.deletePlaylist')}
-										</button>
+													<Share2 size={16} />
+													{t('playlist.share')}
+												</button>
+												<button
+													type="button"
+													onClick={() => {
+														handleStartRename()
+													}}
+													className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm hover:bg-white/10"
+												>
+													<Pencil size={16} />
+													{t('sidebar.rename')}
+												</button>
+												<button
+													type="button"
+													onClick={() => {
+														setOptionsMenuOpen(false)
+														setDeleteModalOpen(true)
+													}}
+													className="flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm text-red-400 hover:bg-white/10"
+												>
+													<Trash2 size={16} />
+													{t('playlist.deletePlaylist')}
+												</button>
 											</div>,
 											document.body
 										)}

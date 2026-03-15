@@ -140,6 +140,7 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 	const [detailsOpen, setDetailsOpen] = useState(false)
 	const [submenuPos, setSubmenuPos] = useState<{ top: number; left: number } | null>(null)
 	const menuRef = useRef<HTMLDivElement>(null)
+	const submenuRef = useRef<HTMLDivElement | null>(null)
 	const submenuTriggerRef = useRef<HTMLDivElement>(null)
 	const submenuTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 	const navigate = useNavigate()
@@ -166,10 +167,10 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 	useEffect(() => {
 		if (!open) return
 		const handleMouseDown = (e: MouseEvent) => {
-			if (
-				menuRef.current &&
-				!menuRef.current.contains(e.target as Node)
-			) {
+			const target = e.target as Node
+			const insideMenu = menuRef.current?.contains(target)
+			const insideSubmenu = submenuRef.current?.contains(target)
+			if (!insideMenu && !insideSubmenu) {
 				setOpen(false)
 				setAddToPlaylistOpen(false)
 				setPlaylistSearch('')
@@ -217,12 +218,14 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 		close()
 	}
 
-	const handleCreatePlaylist = () => {
+	const handleCreatePlaylist = async () => {
 		const name = window.prompt('Playlist name', 'New Playlist')?.trim()
 		if (name) {
-			playlistStore.createPlaylist(name)
-			playlistStore.toggleTrackInPlaylist(name, track.name)
-			setAddToPlaylistOpen(false)
+			const success = await playlistStore.createPlaylist(name)
+			if (success) {
+				playlistStore.toggleTrackInPlaylist(name, track.name)
+				setAddToPlaylistOpen(false)
+			}
 		}
 	}
 
@@ -370,6 +373,7 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 				{addToPlaylistOpen && submenuPos &&
 					createPortal(
 						<div
+							ref={submenuRef}
 							className="fade-in fixed z-[9999] rounded-md bg-[#282828] py-1.5 shadow-xl"
 							style={{ width: `${SUBMENU_WIDTH}px`, top: submenuPos.top, left: submenuPos.left }}
 							onMouseEnter={() => {

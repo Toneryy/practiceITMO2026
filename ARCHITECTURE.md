@@ -1,302 +1,250 @@
-# ITMOtify — Architecture Overview
+# ITMOtify — Архитектура проекта
 
-## High-Level System Diagram
+## Обзор системы
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                              BROWSER                                     │
+│                              БРАУЗЕР                                     │
 │                                                                          │
 │   ┌────────────────────────────────────────────────────────────────┐    │
-│   │                    FRONTEND (Vite + React)                      │    │
+│   │                    FRONTEND (Vite + React)                       │    │
 │   │                      localhost:5173                             │    │
-│   │                                                                 │    │
-│   │   Pages → Stores (MobX) → fetch('/api/...')                    │    │
+│   │                                                                  │    │
+│   │   Pages → MobX Stores → authFetch('/api/...')                    │    │
 │   └──────────────────────────────┬─────────────────────────────────┘    │
 │                                  │  /api/* (Vite proxy)                  │
 └──────────────────────────────────┼──────────────────────────────────────┘
                                    │
                     ───────────────▼───────────────
-                    │                             │
-          ┌─────────▼──────────┐       ┌─────────▼──────────┐
-          │  EXPRESS SERVER    │       │   SQLITE DATABASE   │
-          │  server.ts         │◄─────►│   prisma/dev.db     │
-          │  localhost:3001    │       │   (Prisma ORM)      │
-          └────────────────────┘       └─────────────────────┘
+          ┌─────────────────────────────┐       ┌─────────────────────┐
+          │  EXPRESS SERVER (server.ts)  │◄─────►│  SQLite (Prisma)     │
+          │  localhost:3001              │       │  prisma/dev.db       │
+          └─────────────────────────────┘       └─────────────────────┘
 ```
 
 ---
 
-## Project Root Structure
+## Структура проекта
 
 ```
 practiceITMO2026/
-│
-├── 📁 src/                  ← FRONTEND (React SPA)
-├── 📁 prisma/               ← DATABASE (schema + migrations + seed)
-│
-├── server.ts                ← BACKEND ENTRY (Express API, port 3001)
-├── vite.config.ts           ← FRONTEND build + dev server + proxy
-├── index.html               ← SPA root HTML
-│
-├── tsconfig.json            ← TypeScript root config
-├── tsconfig.app.json        ← Frontend TS config (React)
-├── tsconfig.node.json       ← Backend TS config (server.ts, seed.ts)
-└── package.json
+├── src/                      # Frontend (React SPA)
+├── prisma/                   # Схема БД, миграции, seed
+├── server.ts                 # Backend (Express API)
+├── vite.config.ts            # Vite + proxy /api → 3001
+├── index.html
+├── tsconfig.json
+├── tsconfig.app.json
+├── tsconfig.node.json
+├── package.json
+├── .env                      # DATABASE_URL, JWT_SECRET, LASTFM_API_KEY
+└── .env.example
 ```
 
 ---
 
-## Backend
+## База данных (Prisma + SQLite)
 
-```
-server.ts                     Express entry point (port 3001)
-│
-└── REST API Routes
-    ├── GET  /api/tracks               → tracks.service → Prisma
-    ├── GET  /api/tracks/:id           → tracks.service → Prisma
-    ├── GET  /api/artists              → artists.service → Prisma
-    ├── GET  /api/artists/:name        → artists.service → Prisma
-    ├── GET  /api/playlists            → playlists.service → Prisma
-    ├── POST /api/playlists            → playlists.service → Prisma
-    ├── PUT  /api/playlists/:id/rename → playlists.service → Prisma
-    ├── PUT  /api/playlists/:id/image  → playlists.service → Prisma
-    ├── PUT  /api/playlists/:id/pinned → playlists.service → Prisma
-    ├── POST /api/playlists/:id/tracks → playlists.service → Prisma
-    ├── PUT  /api/playlists/:id/reorder→ playlists.service → Prisma
-    ├── DEL  /api/playlists/:id        → playlists.service → Prisma
-    ├── GET  /api/favorites/trackNames → favorites.service → Prisma
-    ├── POST /api/favorites/toggle     → favorites.service → Prisma
-    ├── GET  /api/subscriptions        → subscriptions.service → Prisma
-    └── POST /api/subscriptions/toggle → subscriptions.service → Prisma
+### Модели
 
-prisma/
-├── schema.prisma             Database schema (SQLite)
-│   ├── model User            id
-│   ├── model Artist          id, name, image, listenersCount, bio
-│   ├── model Album           id, name, cover, artistId
-│   ├── model Track           id, name, file, cover, duration, explicit, artistId, albumId
-│   ├── model Lyrics          id, trackId, lines (JSON)
-│   ├── model Playlist        id, name, image, pinned, userId
-│   ├── model PlaylistTrack   playlistId, trackId, position
-│   ├── model UserFavorite    userId, trackId
-│   └── model UserSubscription userId, artistId
-│
-├── seed.ts                   DB seeding script (Last.fm API + SoundHelix audio)
-└── migrations/               SQL migration history
-    ├── 20260314141038_init/
-    ├── 20260314142218_add_explicit_field/
-    └── 20260314160000_add_artist_bio/
+| Модель | Описание |
+|--------|----------|
+| **User** | username, email, password (bcrypt), avatar; гостевой `default-user` для неавторизованных |
+| **Artist** | name, image, listenersCount, bio |
+| **Album** | name, cover, artistId |
+| **Track** | name, file, cover, duration, explicit, artistId, albumId |
+| **Lyrics** | trackId, lines (JSON) |
+| **Playlist** | name, image, pinned, order, userId |
+| **PlaylistTrack** | playlistId, trackId, order |
+| **UserFavorite** | userId, trackId |
+| **UserSubscription** | userId, artistId |
+| **ListenHistory** | userId, trackId, playedAt (индексы: userId+playedAt, userId+trackId) |
 
-src/services/                 Prisma service functions (called by server.ts)
-├── db.ts                     PrismaClient singleton
-└── api/
-    ├── tracks.service.ts      getTracks, getTrackById
-    ├── artists.service.ts     getArtists, getArtistByName
-    ├── playlists.service.ts   getPlaylists, createPlaylist, toggleTrackInPlaylist …
-    ├── favorites.service.ts   getFavoriteTrackNames, toggleFavorite
-    └── subscriptions.service.ts  getSubscribedArtistNames, toggleSubscription
-```
+### Сид
+
+`prisma/seed.ts` — загрузка артистов (Deezer, Last.fm), треков (SoundHelix), текстов песен. Создаёт `default-user` для гостевого режима.
+
+---
+
+## Backend (Express)
+
+### Auth
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| POST | /api/auth/register | Регистрация (username, email, password) |
+| POST | /api/auth/login | Вход (email, password) → JWT + user |
+| GET | /api/auth/me | Профиль (Bearer token) |
+| PUT | /api/auth/avatar | Обновление аватара |
+
+### Listen History
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| POST | /api/listen-history | Добавить прослушивание (Bearer token, trackName) |
+| GET | /api/listen-history | История прослушиваний (limit) |
+
+### Tracks, Artists, Lyrics
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| GET | /api/tracks | Список (q, artistId, albumId, limit, offset) |
+| GET | /api/tracks/:id | Трек по ID |
+| GET | /api/artists | Все артисты |
+| GET | /api/artists/:name | Артист по имени |
+| GET | /api/lyrics/:trackId | Текст по trackId |
+| GET | /api/lyrics/by-name/:trackName | Текст по имени трека |
+
+### Playlists (userId из Bearer или query/body)
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| GET | /api/playlists | Список плейлистов |
+| POST | /api/playlists | Создать |
+| PUT | /api/playlists/:id/rename | Переименовать |
+| PUT | /api/playlists/:id/image | Обложка |
+| PUT | /api/playlists/:id/pinned | Закрепить |
+| POST | /api/playlists/:id/tracks | Добавить/убрать трек (toggle) |
+| PUT | /api/playlists/:id/reorder | Переупорядочить |
+| DEL | /api/playlists/:id | Удалить |
+
+### Favorites / Subscriptions
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| GET | /api/favorites/trackNames | Избранные (имена) |
+| POST | /api/favorites/toggle | Добавить/убрать |
+| GET | /api/subscriptions | Подписки (имена артистов) |
+| POST | /api/subscriptions/toggle | Подписаться/отписаться |
+
+### Middleware
+
+- **authMiddleware** — извлекает userId из Bearer токена
+- **getUserId(req)** — `req.userId` || query.userId || body.userId || `'default-user'`
+- **requireAuth** — 401, если нет токена (для /api/auth/me, /api/listen-history)
+- **ensureDefaultUser()** — при старте сервера создаёт `default-user`, если его нет
 
 ---
 
 ## Frontend
 
-### Folder Structure
+### Структура `src/`
 
 ```
 src/
+├── main.tsx
+├── App.tsx                   # Router, initListenHistoryReaction, fetchStores
+├── index.css                 # Tailwind
 │
-├── main.tsx                  App entry — ReactDOM.render + i18n init
-├── App.tsx                   Router + global data fetch on mount
-├── index.css                 Global styles (Tailwind base)
+├── config/pages.config.ts    # Константы маршрутов
+├── types/                    # ITrack, IArtist, IMenuItem
+├── i18n/                     # i18next, en.json, ru.json
 │
-├── config/
-│   └── pages.config.ts       Route path constants (PagesConfig static class)
+├── store/
+│   ├── player.store.ts       # Плеер: currentTrack, queue, isPlaying, repeat, shuffle, recentTracks
+│   ├── catalog.store.ts      # Треки, артисты (fetchAll)
+│   ├── playlist.store.ts     # Плейлисты (CRUD, add track)
+│   ├── favorite.store.ts     # Избранное (authFetch)
+│   ├── subscription.store.ts # Подписки (authFetch)
+│   ├── auth.store.ts         # JWT, login, register, logout, authFetch (401 → logout)
+│   ├── language.store.ts     # Язык UI (en/ru)
+│   └── listen-history.reaction.ts  # MobX reaction: фиксация прослушивания через 30 сек
 │
-├── types/                    Shared TypeScript interfaces
-│   ├── track.types.ts        ITrack
-│   ├── artist.types.ts       IArtist
-│   └── menu.types.ts         IMenuItem
+├── hooks/useDecodedParam.ts
+├── data/menu.data.ts
 │
-├── i18n/                     Internationalisation (react-i18next)
-│   ├── index.ts              i18next config + language detector
-│   └── locales/
-│       ├── en.json           English translations
-│       └── ru.json           Russian translations
-│
-├── store/                    Global state (MobX)
-│   ├── player.store.ts       Playback state, queue, shuffle, repeat
-│   ├── catalog.store.ts      Tracks + artists list (fetched from API)
-│   ├── playlist.store.ts     User playlists (fetched + mutated via API)
-│   ├── favorite.store.ts     Liked track names (fetched + toggled via API)
-│   ├── subscription.store.ts Subscribed artist names (fetched + toggled via API)
-│   └── language.store.ts     Active UI language
-│
-├── hooks/
-│   └── useDecodedParam.ts    Decodes URL params (encodeURIComponent)
-│
-├── data/                     Legacy static data (used only for type reference)
-│   ├── tracks.data.ts
-│   ├── artist.data.ts
-│   ├── lyrics.data.ts
-│   └── menu.data.ts          Left-sidebar navigation items
-│
-├── pages/                    Route-level page components
-│   ├── HomePage.tsx           / — Featured artist + popular tracks
-│   ├── SearchPage.tsx         /search — Smart search (songs + artists)
-│   ├── DiscoverPage.tsx       /discover — Trending artists + albums
-│   ├── ArtistsPage.tsx        /artists — All artists grid
-│   ├── ArtistPage.tsx         /artists/:name — Artist profile + tracks + bio
-│   ├── AlbumsPage.tsx         /albums — All albums grid
-│   ├── AlbumPage.tsx          /albums/:name — Album track listing
-│   ├── PlaylistPage.tsx       /playlist/:id — User playlist
-│   ├── LikedSongsPage.tsx     /liked-songs — Favorited tracks
-│   └── RecentlyPlayedPage.tsx /recently-played — Play history
+├── pages/
+│   ├── HomePage.tsx
+│   ├── SearchPage.tsx        # Поиск по трекам и артистам (score-based)
+│   ├── DiscoverPage.tsx
+│   ├── ArtistsPage.tsx, ArtistPage.tsx
+│   ├── AlbumsPage.tsx, AlbumPage.tsx
+│   ├── PlaylistPage.tsx      # Создание, переименование, удаление плейлиста
+│   ├── LikedSongsPage.tsx
+│   ├── RecentlyPlayedPage.tsx # In-memory + API (ListenHistory)
+│   ├── LoginPage.tsx, RegisterPage.tsx
+│   ├── ProfilePage.tsx       # Профиль, статистика, недавно прослушанные
+│   └── SettingsPage.tsx      # Язык, плеер, уведомления, приватность, кэш
 │
 ├── components/
-│   │
-│   ├── layout/               Application shell (rendered once, wraps all pages)
-│   │   ├── Layout.tsx         3-column grid + AudioPlayer
-│   │   ├── left-sidebar/
-│   │   │   ├── LeftSidebar.tsx
-│   │   │   ├── Menu.tsx       Reusable nav link list
-│   │   │   └── SidebarPlaylists.tsx  User playlist list + create button
-│   │   └── right-sidebar/
-│   │       ├── RightSidebar.tsx  Renders Lyrics or Queue panel
-│   │       ├── Lyrics.tsx     Synced scrolling lyrics
-│   │       ├── Lyrics.module.scss
-│   │       └── Queue.tsx      Current playback queue + drag-reorder
-│   │
-│   ├── elements/             Feature-specific composite components
-│   │   ├── player/
-│   │   │   ├── AudioPlayer.tsx     Bottom playback bar
-│   │   │   ├── FullscreenPlayer.tsx  Fullscreen overlay player
-│   │   │   └── useAudioPlayer.tsx  <audio> element ref + sync with playerStore
-│   │   ├── track-table/
-│   │   │   └── TrackTable.tsx     Sortable track list (used on most pages)
-│   │   ├── track-item/
-│   │   │   ├── Track.tsx          Card-style track row
-│   │   │   └── TrackOptionsMenu.tsx  ⋯ context menu (queue, playlist, share, details…)
-│   │   └── search-field/
-│   │       └── SearchField.tsx    Reusable search input (used on HomePage)
-│   │
-│   └── ui/                   Generic, reusable UI primitives
-│       ├── album-card/        AlbumCard
-│       ├── artist-card/       ArtistCard
-│       ├── breadcrumbs/       Breadcrumbs
-│       ├── confirm-modal/     ConfirmModal (delete playlist, etc.)
-│       ├── custom-menu/       CustomMenu
-│       ├── explicit-badge/    ExplicitBadge (「E」marker)
-│       ├── page-container/    PageContainer (title + breadcrumbs wrapper)
-│       ├── progress-bar/      ProgressBar (playback + volume sliders)
-│       └── track-info/        TrackInfo (cover + title + subtitle)
+│   ├── layout/
+│   │   ├── Layout.tsx
+│   │   ├── Header.tsx        # Иконка профиля / Войти, dropdown: профиль, язык, настройки, выход
+│   │   ├── left-sidebar/    # Menu, SidebarPlaylists
+│   │   └── right-sidebar/   # Lyrics, Queue
+│   ├── elements/
+│   │   ├── player/          # AudioPlayer, FullscreenPlayer, useAudioPlayer
+│   │   ├── track-table/     # TrackTable
+│   │   └── track-item/     # Track, TrackOptionsMenu (add to playlist, share, lyrics…)
+│   └── ui/                  # AlbumCard, ArtistCard, Breadcrumbs, ConfirmModal, CustomMenu, etc.
 │
-└── utils/
-    └── transform-duration.ts  Format seconds → "m:ss"
+└── utils/transform-duration.ts
 ```
+
+### MobX Stores
+
+```
+catalogStore ──────► playerStore (currentTrack, queue, isPlaying…)
+       │
+       ▼
+authStore (userId, token, authFetch)
+       │
+       ├──► favoriteStore
+       ├──► subscriptionStore
+       ├──► playlistStore
+       └──► listen-history.reaction (30s threshold, track played → API)
+```
+
+### Поток данных
+
+1. Пользователь → Page/Component
+2. Component → MobX Store (action)
+3. Store → `authFetch('/api/...')` (Authorization: Bearer при наличии)
+4. Vite Proxy → Express
+5. Express → Prisma Service → SQLite
+6. Ответ → `runInAction` → обновление store → re-render
+
+### Listen History: схема реакции
+
+```
+playerStore.currentTrack меняется
+         │
+         ▼
+MobX reaction (listen-history.reaction.ts)
+         │
+         ├─► Трек включился? → Запуск 30-секундного таймера
+         │
+         ├─► Трек сменился/остановлен? → Очистка таймера, сброс
+         │
+         └─► Прошло 30 сек (или половина трека)? → POST /api/listen-history
+                     │
+                     ▼
+              authStore.token → Bearer в заголовке (или пропуск для гостя)
+```
+
+История прослушиваний фиксируется **только** для авторизованных пользователей и только после 30 секунд воспроизведения (или половины длительности трека). Для гостей — локальный in-memory список в `playerStore.recentTracks`.
 
 ---
 
-### Frontend Data Flow
+## Ключевые особенности
 
-```
-  Browser action (click Play / search / toggle like)
-         │
-         ▼
-    Page / Component
-         │
-         ▼
-    MobX Store          ◄──────── localStorage (offline fallback)
-    (synchronous UI update)
-         │  fetch('/api/...')
-         ▼
-    Vite Proxy (:5173)
-         │  forwards to
-         ▼
-    Express (:3001)
-         │
-         ▼
-    Prisma Service
-         │
-         ▼
-    SQLite DB
-         │
-         ▼  JSON response
-    MobX Store (runInAction → re-renders observers)
-         │
-         ▼
-    React Component (re-renders)
-```
+- **Аутентификация**: JWT в localStorage; `authFetch` при 401 делает `logout`
+- **Гость**: `default-user` для избранного, плейлистов, подписок без входа
+- **Listen History**: MobX `reaction` на `currentTrack`; фиксация через 30 сек (антиспам)
+- **Поиск**: скоринг по названию трека и имени артиста; без совпадений — 0, в результатах только релевантные
+- **i18n**: en/ru
+- **Плейлисты**: создание, переименование (на странице и в сайдбаре), добавление треков из TrackOptionsMenu
 
 ---
 
-### MobX Store Relationships
+## Tech Stack
 
-```
-catalogStore          playerStore
-(tracks, artists) ──► (currentTrack, queue, isPlaying…)
-        │
-        ▼
-favoriteStore         subscriptionStore      playlistStore
-(favoritesName[])     (subscribedNames[])    (playlists[])
-        │                      │                    │
-        └──────────────────────┴────────────────────┘
-                               │
-                         API calls to
-                         Express server
-```
-
----
-
-### Component Hierarchy (Runtime)
-
-```
-<App>
- ├── <BrowserRouter>
- │    ├── <FullscreenPlayer>          (portal overlay)
- │    ├── <Toaster>                   (sonner, portal)
- │    └── <Layout>
- │         ├── <LeftSidebar>
- │         │    ├── <Menu> (main nav)
- │         │    ├── <Menu> (library)
- │         │    └── <SidebarPlaylists>
- │         ├── <main>  [page outlet]
- │         │    ├── <HomePage>
- │         │    ├── <SearchPage>
- │         │    ├── <DiscoverPage>
- │         │    ├── <ArtistPage>
- │         │    ├── <AlbumPage>
- │         │    ├── <PlaylistPage>
- │         │    ├── <LikedSongsPage>
- │         │    └── …
- │         ├── <RightSidebar>         (conditional: lyrics/queue open)
- │         │    ├── <Lyrics>
- │         │    └── <Queue>
- │         └── <AudioPlayer>          (fixed bottom bar)
- │              └── <audio> element
- └── (modals rendered via createPortal into document.body)
-      ├── TrackDetailsModal
-      ├── ConfirmModal (delete playlist)
-      └── TrackOptionsMenu submenu (add to playlist)
-```
-
----
-
-### Tech Stack Summary
-
-| Layer | Technology |
-|---|---|
-| Frontend framework | React 19 + TypeScript |
-| Build tool | Vite 7 |
-| Styling | Tailwind CSS v4 |
-| State management | MobX 6 + mobx-react-lite |
+| Слой | Технологии |
+|------|------------|
+| Frontend | React 19, TypeScript, Vite 7, Tailwind v4 |
+| State | MobX 6, mobx-react-lite |
 | Routing | React Router v7 |
-| i18n | i18next + react-i18next |
-| Icons | Lucide React |
-| Toasts | Sonner |
-| Drag & drop | @dnd-kit |
-| Backend | Express.js (Node.js) |
-| ORM | Prisma 6 |
-| Database | SQLite (dev.db) |
-| API transport | REST / JSON |
-| Dev proxy | Vite built-in proxy (`/api` → `:3001`) |
+| i18n | i18next, react-i18next |
+| UI | Lucide React, Sonner, @dnd-kit |
+| Backend | Express, Prisma 6, SQLite |
+| Auth | JWT, bcryptjs |

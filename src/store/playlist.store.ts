@@ -4,7 +4,6 @@ import { toast } from 'sonner'
 import { authStore, authFetch } from './auth.store'
 
 export interface IPlaylist {
-	/** Database id — populated after fetchPlaylists resolves. */
 	id?: string
 	name: string
 	tracks: string[]
@@ -27,14 +26,6 @@ class PlaylistStore {
 		makeAutoObservable(this)
 	}
 
-	// -------------------------------------------------------------------------
-	// Async: load from backend
-	// -------------------------------------------------------------------------
-
-	/**
-	 * Fetches playlists from the backend API and replaces the local list.
-	 * Falls back to localStorage data if the request fails (offline / pre-backend).
-	 */
 	async fetchPlaylists(): Promise<void> {
 		this.isLoading = true
 		this.error = null
@@ -47,30 +38,50 @@ class PlaylistStore {
 				this.playlists = data
 				this.pinnedNames = data.filter(p => p.pinned).map(p => p.name)
 				this.isLoading = false
+				this.saveToLocalStorage()
 			})
 		} catch (err) {
 			runInAction(() => {
 				this.isLoading = false
 				this.error = err instanceof Error ? err.message : 'Unknown error'
 			})
-			// Leave playlists unchanged (localStorage fallback stays intact).
 		}
 	}
-
-	// -------------------------------------------------------------------------
-	// Synchronous helpers (localStorage — kept as fallback until API is wired)
-	// -------------------------------------------------------------------------
 
 	private saveToLocalStorage() {
 		localStorage.setItem('playlists', JSON.stringify(this.playlists))
 		localStorage.setItem('playlists-pinned', JSON.stringify(this.pinnedNames))
 	}
 
-	createPlaylist(name: string) {
-		if (this.playlists.find(playlist => playlist.name === name)) return
-		this.playlists.push({ name, tracks: [] })
-		this.saveToLocalStorage()
-		toast.success('Playlist created')
+	async createPlaylist(name: string): Promise<boolean> {
+		if (this.playlists.find(playlist => playlist.name === name)) return false
+		
+		try {
+			const res = await authFetch('/api/playlists', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ userId: authStore.userId, name })
+			})
+			
+			if (!res.ok) return false
+			const created = await res.json()
+			
+			runInAction(() => {
+				this.playlists.push({
+					id: created.id,
+					name: created.name,
+					tracks: [],
+					pinned: false
+				})
+				this.saveToLocalStorage()
+			})
+			
+			toast.success('Playlist created')
+			return true
+		} catch {
+			toast.error('Failed to create playlist')
+			return false
+		}
 	}
 
 	renamePlaylist(oldName: string, newName: string) {
@@ -79,19 +90,34 @@ class PlaylistStore {
 		if (this.playlists.some(p => p.name === trimmed)) return
 		const playlist = this.playlists.find(p => p.name === oldName)
 		if (!playlist) return
+
+		const playlistId = playlist.id
 		playlist.name = trimmed
 		const idx = this.pinnedNames.indexOf(oldName)
-		if (idx !== -1) {
-			this.pinnedNames[idx] = trimmed
-		}
+		if (idx !== -1) this.pinnedNames[idx] = trimmed
 		this.saveToLocalStorage()
+
+		if (playlistId) {
+			authFetch(`/api/playlists/${playlistId}/rename`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ userId: authStore.userId, newName: trimmed })
+			}).catch(() => {})
+		}
 	}
 
 	deletePlaylist(name: string) {
+		const playlist = this.playlists.find(p => p.name === name)
+		const playlistId = playlist?.id
+
 		this.playlists = this.playlists.filter(p => p.name !== name)
 		this.pinnedNames = this.pinnedNames.filter(n => n !== name)
 		this.saveToLocalStorage()
 		toast.success('Playlist deleted')
+
+		if (playlistId) {
+			authFetch(`/api/playlists/${playlistId}`, { method: 'DELETE' }).catch(() => {})
+		}
 	}
 
 	updatePlaylistImage(playlistName: string, image: string) {
@@ -100,6 +126,14 @@ class PlaylistStore {
 		playlist.image = image
 		this.saveToLocalStorage()
 		toast.success('Cover updated')
+
+		if (playlist.id) {
+			authFetch(`/api/playlists/${playlist.id}/image`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ image })
+			}).catch(() => {})
+		}
 	}
 
 	togglePinned(name: string) {
@@ -109,10 +143,13 @@ class PlaylistStore {
 		} else {
 			this.pinnedNames.splice(idx, 1)
 		}
-		// Mirror pinned flag on the playlist object itself (used by API layer).
 		const playlist = this.playlists.find(p => p.name === name)
 		if (playlist) playlist.pinned = idx === -1
 		this.saveToLocalStorage()
+
+		if (playlist?.id) {
+			authFetch(`/api/playlists/${playlist.id}/pinned`, { method: 'PUT' }).catch(() => {})
+		}
 	}
 
 	isPinned(name: string) {
@@ -145,6 +182,14 @@ class PlaylistStore {
 				? `Track removed from ${playlistName}`
 				: `Track added to ${playlistName}`
 		)
+
+		if (playlist.id) {
+			authFetch(`/api/playlists/${playlist.id}/tracks`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ trackName })
+			}).catch(() => {})
+		}
 	}
 
 	isTrackInPlaylist(playlistName: string, trackName: string) {
@@ -168,6 +213,14 @@ class PlaylistStore {
 		playlist.tracks = arrayMove(playlist.tracks, oldIndex, newIndex)
 		this.saveToLocalStorage()
 		toast.success('Order updated')
+
+		if (playlist.id) {
+			authFetch(`/api/playlists/${playlist.id}/reorder`, {
+				method: 'PUT',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ orderedTrackNames: playlist.tracks })
+			}).catch(() => {})
+		}
 	}
 }
 

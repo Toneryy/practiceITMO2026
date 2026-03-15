@@ -467,9 +467,33 @@ app.post('/api/subscriptions/toggle', async (req, res) => {
 })
 
 // ---------------------------------------------------------------------------
+// Ensure default guest user exists (required for playlists when not logged in)
+// ---------------------------------------------------------------------------
+
+async function ensureDefaultUser() {
+	await prisma.user.upsert({
+		where: { id: DEFAULT_USER_ID },
+		update: {},
+		create: {
+			id: DEFAULT_USER_ID,
+			username: 'default',
+			email: 'default@itmotify.local',
+			password: '$2a$10$dummy_hash_for_guest_user_only'
+		}
+	})
+}
+
+// ---------------------------------------------------------------------------
 // Start
 // ---------------------------------------------------------------------------
 
-app.listen(PORT, () => {
-	console.log(`API server running at http://localhost:${PORT}`)
-})
+ensureDefaultUser()
+	.then(() => {
+		app.listen(PORT, () => {
+			console.log(`API server running at http://localhost:${PORT}`)
+		})
+	})
+	.catch(err => {
+		console.error('Failed to start server:', err)
+		process.exit(1)
+	})

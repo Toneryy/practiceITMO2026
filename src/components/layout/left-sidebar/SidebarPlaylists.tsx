@@ -202,11 +202,13 @@ export const SidebarPlaylists = observer(function SidebarPlaylists() {
 							placeholder={t('sidebar.playlistNamePlaceholder')}
 							value={value}
 							onChange={e => setValue(e.target.value)}
-							onKeyDown={e => {
+							onKeyDown={async e => {
 								if (e.key === 'Enter' && value.trim()) {
-									playlistStore.createPlaylist(value.trim())
-									setValue('')
-									setIsShow(false)
+									const success = await playlistStore.createPlaylist(value.trim())
+									if (success) {
+										setValue('')
+										setIsShow(false)
+									}
 								}
 							}}
 							className="rounded-md px-3 py-2 w-full"

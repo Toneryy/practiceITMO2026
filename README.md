@@ -1,69 +1,180 @@
-# React + TypeScript + Vite
+# ITMOtify
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Музыкальный стриминговый сервис в стиле Spotify — учебный проект на React, Express и SQLite.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Возможности
 
-## Expanding the ESLint configuration
+### Музыка
+- **Прослушивание** — воспроизведение треков, очередь, shuffle, repeat
+- **Тексты песен** — синхронизированные с прокруткой
+- **Полноэкранный плеер** — оверлей с визуализацией
+- **Поиск** — по трекам и исполнителям (ранжирование по релевантности)
+- **Недавно слушали** — история для авторизованных (30+ секунд прослушивания) и локальная для гостей
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Библиотека
+- **Плейлисты** — создание, переименование, удаление, добавление треков, смена обложки, закрепление
+- **Избранное** — лайки треков, привязанные к аккаунту
+- **Подписки** — подписка на исполнителей
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### Аккаунт
+- **Регистрация и вход** — email + пароль, JWT-сессии
+- **Профиль** — аватар, статистика (лайки, плейлисты, подписки, прослушивания)
+- **Настройки** — язык, качество звука, уведомления, приватность (UI)
+- **Кнопка входа / иконка профиля** — в шапке, выпадающее меню (профиль, язык, настройки, выход)
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### Интерфейс
+- **Сайдбар** — навигация, библиотека, плейлисты
+- **Тёмная тема** — единый стиль
+- **i18n** — русский и английский
+- **Адаптивная сетка** — артисты, альбомы, треки
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## Стек технологий
+
+| Слой      | Технологии                          |
+|-----------|--------------------------------------|
+| Frontend  | React 19, TypeScript, Vite 7, Tailwind CSS v4 |
+| Состояние | MobX 6, mobx-react-lite             |
+| Роутинг   | React Router v7                      |
+| Backend   | Express.js, Node.js                  |
+| БД        | SQLite, Prisma 6                     |
+| Аутентификация | JWT (jsonwebtoken), bcryptjs   |
+
+---
+
+## Быстрый старт
+
+### Требования
+- Node.js 18+
+- npm или yarn
+
+### Установка
+
+```bash
+# Клонировать репозиторий
+git clone <repo-url>
+cd practiceITMO2026
+
+# Установить зависимости
+npm install
+
+# Создать .env (скопировать из .env.example)
+cp .env.example .env
+
+# Заполнить .env:
+# DATABASE_URL="file:./prisma/dev.db"
+# JWT_SECRET="your-secret-key"
+# LASTFM_API_KEY="..." (опционально, для сида)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### База данных
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Применить миграции
+npx prisma migrate dev
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Заполнить данными (артисты, треки, тексты — Last.fm + SoundHelix)
+npm run db:seed
 ```
+
+### Запуск
+
+```bash
+# Frontend (Vite :5173) + Backend (Express :3001)
+npm run dev:all
+```
+
+Откройте http://127.0.0.1:5173
+
+---
+
+## Скрипты
+
+| Команда         | Описание                    |
+|-----------------|-----------------------------|
+| `npm run dev`   | Только фронтенд (Vite)      |
+| `npm run server`| Только API (Express)        |
+| `npm run dev:all`| Фронт + API                 |
+| `npm run build` | Сборка production           |
+| `npm run db:generate` | Prisma Client          |
+| `npm run db:migrate`  | Миграции               |
+| `npm run db:seed`    | Заполнение БД         |
+| `npm run db:studio`  | Prisma Studio (GUI)   |
+
+---
+
+## Структура проекта
+
+```
+practiceITMO2026/
+├── src/                    # Frontend (React SPA)
+│   ├── components/         # layout, elements, ui
+│   ├── pages/              # страницы (Home, Search, Profile, Settings…)
+│   ├── store/              # MobX stores (player, auth, catalog, playlist…)
+│   ├── services/           # API-сервисы
+│   ├── i18n/               # переводы (en, ru)
+│   └── types/              # TypeScript-типы
+├── prisma/
+│   ├── schema.prisma       # схема БД
+│   ├── seed.ts             # сид данных
+│   └── migrations/
+├── server.ts               # Backend (Express API)
+├── vite.config.ts
+└── package.json
+```
+
+Подробнее — в [ARCHITECTURE.md](./ARCHITECTURE.md).
+
+---
+
+## Маршруты приложения
+
+| Путь | Страница | Описание |
+|------|----------|----------|
+| `/` | HomePage | Главная |
+| `/search` | SearchPage | Поиск по трекам и артистам |
+| `/discover` | DiscoverPage | Рекомендации |
+| `/liked-songs` | LikedSongsPage | Избранные треки |
+| `/playlist/:id` | PlaylistPage | Плейлист |
+| `/artists` | ArtistsPage | Все артисты |
+| `/artists/:name` | ArtistPage | Страница артиста |
+| `/albums` | AlbumsPage | Все альбомы |
+| `/albums/:name` | AlbumPage | Страница альбома |
+| `/recently-played` | RecentlyPlayedPage | Недавно прослушанные |
+| `/login` | LoginPage | Вход |
+| `/register` | RegisterPage | Регистрация |
+| `/profile` | ProfilePage | Профиль |
+| `/settings` | SettingsPage | Настройки |
+
+---
+
+## API (кратко)
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| POST | `/api/auth/register` | Регистрация |
+| POST | `/api/auth/login`   | Вход |
+| GET  | `/api/auth/me`      | Текущий пользователь (JWT) |
+| GET  | `/api/tracks`       | Треки (q, artistId, limit) |
+| GET  | `/api/artists`      | Исполнители |
+| GET  | `/api/playlists`    | Плейлисты пользователя |
+| POST | `/api/playlists`    | Создание плейлиста |
+| POST | `/api/playlists/:id/tracks` | Добавить/убрать трек |
+| POST | `/api/favorites/toggle`     | Лайк трека |
+| POST | `/api/listen-history`       | Записать прослушивание (30+ сек) |
+| GET  | `/api/listen-history`       | История прослушиваний |
+
+---
+
+## Гостевой режим
+
+Без входа используется пользователь `default-user` — плейлисты, лайки и подписки работают локально и привязаны к этому пользователю. Для сохранения истории прослушиваний и личных данных нужен вход.
+
+---
+
+## Лицензия
+
+Учебный проект.

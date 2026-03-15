@@ -37,7 +37,18 @@ export const RecentlyPlayedPage = observer(() => {
 			.finally(() => setLoading(false))
 	}, [])
 
-	const tracks = authStore.isAuthenticated ? serverTracks : playerStore.recentTracks
+	const inMemory = playerStore.recentTracks
+	const serverNames = new Set(serverTracks.map(t => t.name))
+	const merged = [
+		...inMemory.filter(t => !serverNames.has(t.name)),
+		...serverTracks
+	]
+	const seen = new Set<string>()
+	const tracks = merged.filter(t => {
+		if (seen.has(t.name)) return false
+		seen.add(t.name)
+		return true
+	})
 
 	return (
 		<PageContainer

@@ -17,6 +17,7 @@ import { RecentlyPlayedPage } from '@/pages/RecentlyPlayedPage'
 import { SearchPage } from '@/pages/SearchPage'
 import { catalogStore } from '@/store/catalog.store'
 import { favoriteStore } from '@/store/favorite.store'
+import { playlistStore } from '@/store/playlist.store'
 import { subscriptionStore } from '@/store/subscription.store'
 import { initListenHistoryReaction } from '@/store/listen-history.reaction'
 import { useEffect } from 'react'
@@ -29,6 +30,7 @@ export default function App() {
 		catalogStore.fetchAll()
 		favoriteStore.fetchFavorites()
 		subscriptionStore.fetchSubscriptions()
+		playlistStore.fetchPlaylists()
 	}, [])
 
 	return (

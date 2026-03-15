@@ -104,7 +104,8 @@
     "delete": "Delete",
     "cancel": "Cancel",
     "deleteConfirm": "Are you sure you want to delete \"{{name}}\"? This cannot be undone.",
-    "tracksCount": "{{count}} tracks"
+    "tracksCount": "{{count}} tracks",
+    "renameError": "A playlist with this name already exists"
   },
   "likedSongs": {
     "title": "Liked Songs",
