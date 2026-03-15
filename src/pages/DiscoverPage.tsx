@@ -24,7 +24,7 @@ export const DiscoverPage = observer(function DiscoverPage() {
 			]}
 		>
 			<section className="mb-10">
-				<h2 className="mb-4 text-xl font-bold">{t('discover.trendingArtists')}</h2>
+				<h2 className="mb-4 text-lg font-bold">{t('discover.trendingArtists')}</h2>
 				<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
 					{trendingArtists.map(artist => (
 						<ArtistCard
@@ -36,7 +36,7 @@ export const DiscoverPage = observer(function DiscoverPage() {
 			</section>
 
 			<section className="mb-10">
-				<h2 className="mb-4 text-xl font-bold">{t('discover.popularAlbums')}</h2>
+				<h2 className="mb-4 text-lg font-bold">{t('discover.popularAlbums')}</h2>
 				<div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-6">
 					{albums.map(([album, track]) => (
 						<AlbumCard
@@ -50,7 +50,7 @@ export const DiscoverPage = observer(function DiscoverPage() {
 			</section>
 
 			<section>
-				<h2 className="mb-4 text-xl font-bold">{t('discover.popularTracks')}</h2>
+				<h2 className="mb-4 text-lg font-bold">{t('discover.popularTracks')}</h2>
 				<TrackTable tracks={popularTracks} />
 			</section>
 		</PageContainer>

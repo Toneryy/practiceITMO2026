@@ -80,11 +80,11 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 					alt=""
 					className="h-full w-full scale-110 object-cover blur-3xl"
 				/>
-				<div className="absolute inset-0 bg-black/65" />
+				<div className="absolute inset-0 bg-black/90" />
 			</div>
 
 			{/* Top bar: close + queue toggle */}
-			<div className="sticky top-0 z-20 flex items-center justify-between px-6 pt-5 pb-2">
+			<div className="sticky top-0 z-20 flex items-center justify-between px-4 pt-4 pb-2 sm:px-6 sm:pt-5">
 				<div className="w-10" />
 				<button
 					type="button"
@@ -106,25 +106,25 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 					title={queueOpen ? t('player.hideQueue') : t('player.showQueue')}
 				>
 					<ListMusic size={18} />
-					{t('player.queue')}
+					<span className="hidden sm:inline">{t('player.queue')}</span>
 				</button>
 			</div>
 
 			{/* ── Section 1: Player (+ sliding queue panel) ── */}
-			<section className="flex min-h-[calc(100vh-64px)] items-center justify-center px-8 pb-16">
+			<section className="flex min-h-[calc(100vh-64px)] items-center justify-center px-4 pb-12 sm:px-6 md:px-8 md:pb-16">
 				<div
 					className={cn(
-						'flex w-full items-center gap-6 transition-all duration-500',
-						queueOpen ? 'max-w-7xl' : 'max-w-5xl justify-center'
+						'flex w-full flex-col items-center gap-4 transition-all duration-500 sm:flex-row sm:gap-6',
+						queueOpen ? 'max-w-7xl' : 'max-w-5xl sm:justify-center'
 					)}
 				>
 					{/* Main player area */}
 					<div
 						className={cn(
-							'grid items-center gap-16 transition-all duration-500',
+							'grid w-full items-center gap-6 transition-all duration-500 sm:gap-12 md:gap-16',
 							queueOpen
-								? 'flex-1 grid-cols-2'
-								: 'w-full max-w-5xl grid-cols-2 gap-20'
+								? 'flex-1 grid-cols-1 sm:grid-cols-2'
+								: 'max-w-5xl grid-cols-1 gap-12 sm:grid-cols-2 md:gap-20'
 						)}
 					>
 						{/* Album art */}
@@ -134,13 +134,13 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 								alt={track.name}
 								className={cn(
 									'aspect-square rounded-2xl object-cover shadow-2xl transition-all duration-500',
-									queueOpen ? 'max-w-[300px]' : 'w-full max-w-[420px]'
+									queueOpen ? 'max-w-[260px] sm:max-w-[300px]' : 'w-full max-w-[280px] sm:max-w-[360px] md:max-w-[420px]'
 								)}
 							/>
 						</div>
 
 						{/* Controls */}
-						<div className="flex flex-col gap-7">
+						<div className="flex flex-col gap-4 sm:gap-7">
 							{/* Track info */}
 							<div className="flex items-start justify-between gap-4">
 					<div className="min-w-0">
@@ -150,7 +150,7 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 									onClick={() => playerStore.toggleFullscreen()}
 									className={cn(
 										'truncate font-bold leading-tight transition-all duration-300 hover:underline',
-										queueOpen ? 'text-2xl' : 'text-4xl'
+										queueOpen ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl md:text-4xl'
 									)}
 								>
 									{track.name}
@@ -162,7 +162,7 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 								onClick={() => playerStore.toggleFullscreen()}
 								className={cn(
 									'mt-1 block truncate text-white/60 hover:underline hover:text-white transition-all duration-300',
-									queueOpen ? 'text-base' : 'text-xl'
+									queueOpen ? 'text-sm sm:text-base' : 'text-base sm:text-lg md:text-xl'
 								)}
 							>
 								{track.artist.name}
@@ -193,7 +193,7 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 							/>
 
 							{/* Playback buttons */}
-							<div className="flex items-center justify-center gap-6">
+							<div className="flex items-center justify-center gap-3 sm:gap-6">
 								<button
 									type="button"
 									onClick={() => playerStore.toggleShuffle()}
@@ -209,17 +209,17 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 									onClick={() => playerStore.changeTrack('prev')}
 									className="opacity-60 transition hover:opacity-100"
 								>
-									<SkipBack size={26} fill="currentColor" />
+									<SkipBack size={22} fill="currentColor" className="sm:w-[26px] sm:h-[26px]" />
 								</button>
 								<button
 									type="button"
 									onClick={() => playerStore.togglePlayPause()}
-									className="rounded-full bg-white p-4 text-black shadow-xl transition hover:scale-105"
+									className="rounded-full bg-white p-3 text-black shadow-xl transition hover:scale-105 sm:p-4"
 								>
 									{playerStore.isPlaying ? (
-										<Pause size={28} fill="currentColor" />
+										<Pause size={24} fill="currentColor" className="sm:w-7 sm:h-7" />
 									) : (
-										<Play size={28} fill="currentColor" />
+										<Play size={24} fill="currentColor" className="sm:w-7 sm:h-7" />
 									)}
 								</button>
 								<button
@@ -227,7 +227,7 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 									onClick={() => playerStore.changeTrack('next')}
 									className="opacity-60 transition hover:opacity-100"
 								>
-									<SkipForward size={26} fill="currentColor" />
+									<SkipForward size={22} fill="currentColor" className="sm:w-[26px] sm:h-[26px]" />
 								</button>
 								<button
 									type="button"
@@ -273,10 +273,10 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 					<div
 						className={cn(
 							'overflow-hidden transition-all duration-500',
-							queueOpen ? 'w-80 opacity-100' : 'w-0 opacity-0'
+							queueOpen ? 'w-full min-w-0 opacity-100 sm:w-72 md:w-80' : 'w-0 min-w-0 opacity-0'
 						)}
 					>
-						<div className="flex h-[70vh] w-80 flex-col rounded-2xl bg-white/10 backdrop-blur-sm">
+						<div className="flex h-[60vh] min-h-[300px] w-full max-w-[85vw] flex-col rounded-2xl bg-white/10 backdrop-blur-sm sm:h-[70vh] sm:max-w-none sm:w-80">
 						<div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
 							<h2 className="font-semibold">{t('player.queue')}</h2>
 							<span className="text-sm text-white/40">{t('player.tracksCount', { count: queue.length })}</span>
@@ -338,11 +338,11 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 			</section>
 
 			{/* ── Section 2: Lyrics + Details ── */}
-			<section className="mx-auto w-full max-w-5xl px-4 pb-16">
-			<div className="grid grid-cols-2 gap-8">
+			<section className="mx-auto w-full max-w-5xl px-4 pb-10 sm:pb-16">
+			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-8">
 			{/* Lyrics */}
-			<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">
-				<h2 className="mb-6 text-xl font-semibold">{t('player.lyrics')}</h2>
+			<div className="rounded-2xl bg-white/5 p-4 backdrop-blur-sm sm:p-8">
+				<h2 className="mb-4 text-lg font-semibold sm:mb-6 sm:text-xl">{t('player.lyrics')}</h2>
 				{lyricsLoading ? (
 					<p className="text-sm text-white/40 italic">
 						{t('player.lyricsLoading', 'Loading...')}
@@ -377,8 +377,8 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 			</div>
 
 					{/* Details */}
-					<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">
-						<h2 className="mb-6 text-xl font-semibold">{t('player.details')}</h2>
+					<div className="rounded-2xl bg-white/5 p-4 backdrop-blur-sm sm:p-8">
+						<h2 className="mb-4 text-lg font-semibold sm:mb-6 sm:text-xl">{t('player.details')}</h2>
 						<div className="grid grid-cols-1 gap-4">
 							{details.map(({ icon: Icon, label, value }) => (
 								<div
@@ -401,8 +401,8 @@ export const FullscreenPlayer = observer(function FullscreenPlayer() {
 
 			{/* ── Section 3: Queue grid ── */}
 			{queue.length > 0 && (
-				<section className="mx-auto w-full max-w-5xl px-4 pb-20">
-					<div className="rounded-2xl bg-white/5 p-8 backdrop-blur-sm">
+				<section className="mx-auto w-full max-w-5xl px-4 pb-10 sm:pb-20">
+					<div className="rounded-2xl bg-white/5 p-4 backdrop-blur-sm sm:p-8">
 						<div className="mb-6 flex items-center gap-2">
 							<ListMusic size={20} className="text-white/60" />
 							<h2 className="text-xl font-semibold">{t('player.queue')}</h2>

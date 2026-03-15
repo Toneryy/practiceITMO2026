@@ -14,11 +14,11 @@ interface Props {
 
 export function PageContainer({ title, breadcrumbs, children }: Props) {
 	return (
-		<div className="px-8 py-6">
+		<div className="px-4 py-4 sm:px-6 sm:py-5 md:px-8 md:py-6">
 			{breadcrumbs && breadcrumbs.length > 0 && (
 				<Breadcrumbs items={breadcrumbs} />
 			)}
-			{title && <h1 className="text-3xl font-bold mb-6">{title}</h1>}
+			{title && <h1 className="mb-4 text-xl font-bold sm:mb-5 sm:text-2xl md:mb-6">{title}</h1>}
 			{children}
 		</div>
 	)

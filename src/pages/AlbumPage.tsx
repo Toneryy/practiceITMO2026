@@ -49,7 +49,7 @@ export const AlbumPage = observer(function AlbumPage() {
 				/>
 				<div className="flex flex-col justify-end">
 					<p className="text-sm uppercase text-neutral-400">{t('album.type')}</p>
-					<h1 className="text-4xl font-bold">{albumName}</h1>
+					<h1 className="text-2xl font-bold sm:text-3xl">{albumName}</h1>
 					<p className="text-neutral-400">{album.artist.name}</p>
 				</div>
 			</div>

@@ -88,7 +88,7 @@ export const ProfilePage = observer(function ProfilePage() {
 					</div>
 				)}
 				<div>
-					<h1 className="text-3xl font-bold text-white">{user.username}</h1>
+					<h1 className="text-2xl font-bold text-white sm:text-3xl">{user.username}</h1>
 					<p className="mt-1 text-sm text-neutral-400">{user.email}</p>
 					{user.createdAt && (
 						<p className="mt-1 text-xs text-neutral-500">

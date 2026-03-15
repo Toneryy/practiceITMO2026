@@ -37,7 +37,7 @@ export const LoginPage = observer(function LoginPage() {
 					<div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20">
 						<Music className="text-primary" size={24} />
 					</div>
-					<h1 className="text-2xl font-bold text-white">{t('auth.loginTitle')}</h1>
+					<h1 className="text-xl font-bold text-white sm:text-2xl">{t('auth.loginTitle')}</h1>
 					<p className="text-sm text-neutral-400">{t('auth.loginSubtitle')}</p>
 				</div>
 

@@ -2,12 +2,16 @@ import { observer } from 'mobx-react-lite'
 import { authStore } from '@/store/auth.store'
 import { languageStore } from '@/store/language.store'
 import { CustomMenu } from '@/components/ui/custom-menu/CustomMenu'
-import { User, LogIn, Loader2, LogOut, Globe, UserCircle, Settings } from 'lucide-react'
+import { User, LogIn, Loader2, LogOut, Globe, UserCircle, Settings, Menu } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useEffect, useRef, useState } from 'react'
 
-export const Header = observer(function Header() {
+interface HeaderProps {
+	onMenuClick?: () => void
+}
+
+export const Header = observer(function Header({ onMenuClick }: HeaderProps) {
 	const { t } = useTranslation()
 	const navigate = useNavigate()
 	const [menuOpen, setMenuOpen] = useState(false)
@@ -26,8 +30,20 @@ export const Header = observer(function Header() {
 
 	if (authStore.isLoading) {
 		return (
-			<header className="flex items-center justify-end px-6 pb-3 pt-9">
-				<Loader2 size={20} className="animate-spin text-neutral-400" />
+			<header className="flex items-center justify-between gap-4 px-4 pb-3 pt-6 sm:justify-end sm:px-6 sm:pt-9">
+				{onMenuClick && (
+					<button
+						type="button"
+						onClick={onMenuClick}
+						className="flex md:hidden size-10 shrink-0 items-center justify-center rounded-lg bg-white/5 text-white transition hover:bg-white/10"
+						aria-label="Open menu"
+					>
+						<Menu size={20} />
+					</button>
+				)}
+				<div className="flex flex-1 justify-end">
+					<Loader2 size={20} className="animate-spin text-neutral-400" />
+				</div>
 			</header>
 		)
 	}
@@ -36,7 +52,17 @@ export const Header = observer(function Header() {
 	const langLabel = languageStore.language === 'en' ? 'Русский' : 'English'
 
 	return (
-		<header className="flex items-center justify-end px-6 pb-3 pt-9">
+		<header className="flex items-center justify-between gap-4 px-4 pb-3 pt-6 sm:justify-end sm:px-6 sm:pt-9">
+			{onMenuClick && (
+				<button
+					type="button"
+					onClick={onMenuClick}
+					className="flex md:hidden h-10 w-10 items-center justify-center rounded-full bg-white/5 text-white transition hover:bg-white/10"
+					aria-label="Open menu"
+				>
+					<Menu size={22} />
+				</button>
+			)}
 			{authStore.isAuthenticated ? (
 				<div ref={containerRef} className="relative">
 					<button

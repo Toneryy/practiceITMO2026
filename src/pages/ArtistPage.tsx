@@ -250,7 +250,7 @@ export const ArtistPage = observer(function ArtistPage() {
 					<p className="text-sm font-medium uppercase tracking-wide text-neutral-400">
 						{t('artist.type')}
 					</p>
-					<h1 className="text-4xl font-bold sm:text-5xl">{artist.name}</h1>
+					<h1 className="text-2xl font-bold sm:text-3xl md:text-4xl">{artist.name}</h1>
 					<p className="mt-1 text-sm text-neutral-400">
 						{artist.listenersCount.toLocaleString()} listeners •{' '}
 						{topTracks.length} tracks • {formatTotalDuration(totalDurationSec)}
@@ -389,7 +389,7 @@ export const ArtistPage = observer(function ArtistPage() {
 
 		{/* Top Tracks */}
 		<section>
-			<h2 className="mb-4 text-xl font-bold">{t('artist.topTracks')}</h2>
+			<h2 className="mb-4 text-lg font-bold">{t('artist.topTracks')}</h2>
 			{topTracks.length === 0 ? (
 				<p className="text-neutral-400">{t('artist.noTracks')}</p>
 			) : (
@@ -400,7 +400,7 @@ export const ArtistPage = observer(function ArtistPage() {
 		{/* Biography */}
 		{artist.bio && (
 			<section className="mt-10">
-				<h2 className="mb-4 text-xl font-bold">{t('artist.bio')}</h2>
+				<h2 className="mb-4 text-lg font-bold">{t('artist.bio')}</h2>
 				<div className="relative rounded-2xl bg-white/5 p-6">
 					<div
 						className={cn(

@@ -11,7 +11,7 @@ export const Queue = observer(function Queue() {
 
 	return (
 		<div className="flex flex-col py-4">
-			<h2 className="mb-4 px-4 text-lg font-semibold text-white">Queue</h2>
+			<h2 className="mb-4 px-4 text-base font-semibold text-white">Queue</h2>
 			{queueList.length === 0 ? (
 				<p className="px-4 text-sm text-white/50">
 					No tracks in queue. Play something from Home or a playlist.

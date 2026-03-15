@@ -254,8 +254,8 @@ export const PlaylistPage = observer(() => {
 				{ label: playlist.name }
 			]}
 		>
-			<div className="mb-8">
-				<div className="flex items-start gap-6">
+			<div className="mb-6 sm:mb-8 -mx-4 px-4 sm:mx-0 sm:px-0">
+				<div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-start sm:gap-6">
 					<input
 						ref={coverInputRef}
 						type="file"
@@ -266,7 +266,7 @@ export const PlaylistPage = observer(() => {
 					<button
 						type="button"
 						onClick={() => coverInputRef.current?.click()}
-						className="group relative h-48 w-48 shrink-0 overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/10 hover:ring-white/20 transition-all"
+						className="group relative h-32 w-32 shrink-0 self-start overflow-hidden rounded-xl bg-white/10 ring-1 ring-white/10 hover:ring-white/20 transition-all sm:h-40 sm:w-40 md:h-48 md:w-48"
 					>
 						{playlist.image ? (
 							<img
@@ -282,14 +282,14 @@ export const PlaylistPage = observer(() => {
 							/>
 						) : (
 							<div className="flex h-full w-full items-center justify-center text-white/40">
-								<ImagePlus size={48} />
+								<ImagePlus size={32} className="sm:w-12 sm:h-12" />
 							</div>
 						)}
 						<span className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
 							<ImagePlus size={32} className="text-white" />
 						</span>
 					</button>
-					<div className="min-w-0 flex-1">
+					<div className="min-w-0 flex-1 w-full">
 						{isRenaming ? (
 							<div className="mb-2">
 								<input
@@ -302,47 +302,48 @@ export const PlaylistPage = observer(() => {
 										if (e.key === 'Escape') handleCancelRename()
 									}}
 									onBlur={handleSaveRename}
-									className="w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-2xl font-bold text-white outline-none focus:border-primary"
+									className="w-full rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-lg font-bold text-white outline-none focus:border-primary sm:text-xl md:text-2xl"
 								/>
 							</div>
 						) : (
 							<div
-								className="group/title flex cursor-pointer items-center gap-2 rounded-lg py-1 pr-2 -ml-2 hover:bg-white/5 transition-colors"
+								className="group/title flex cursor-pointer items-center gap-2 rounded-lg py-1 pr-2 hover:bg-white/5 transition-colors"
 								onClick={handleStartRename}
 							>
-								<h1 className="text-3xl font-bold">{playlist.name}</h1>
+								<h1 className="truncate text-xl font-bold sm:text-2xl md:text-3xl">{playlist.name}</h1>
 								<Pencil
 									size={18}
 									className="shrink-0 text-white/40 opacity-0 transition-opacity group-hover/title:opacity-100"
 								/>
 							</div>
 						)}
-					<div className="text-neutral-400 text-sm mt-1 mb-6">
+					<div className="text-neutral-400 text-sm mt-1 mb-4 sm:mb-6">
 						{t('playlist.tracksCount', { count: tracks.length })} • {formatTotalDuration(totalDurationSec)}
 					</div>
-						<div className="flex w-full items-center justify-between">
-							<div className="flex items-center gap-3">
+						<div className="flex w-full flex-wrap items-center justify-between gap-3">
+							<div className="flex items-center gap-2 sm:gap-3">
 								<button
 									type="button"
 									onClick={handlePlay}
 									disabled={tracks.length === 0}
-									className="rounded-full bg-primary text-black p-3.5 hover:scale-105 transition-transform disabled:opacity-50 disabled:hover:scale-100"
+									className="rounded-full bg-primary p-3 text-black transition-transform hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 sm:p-3.5"
 								>
 									<Play
-										size={24}
+										size={20}
 										fill="currentColor"
+										className="sm:w-6 sm:h-6"
 									/>
 								</button>
 								<button
 									type="button"
 									onClick={handleShuffle}
 									disabled={tracks.length === 0}
-									className="rounded-full bg-white/10 p-3.5 hover:bg-white/20 transition-colors disabled:opacity-50"
+									className="rounded-full bg-white/10 p-3 transition-colors hover:bg-white/20 disabled:opacity-50 sm:p-3.5"
 								>
-									<Shuffle size={24} />
+									<Shuffle size={20} className="sm:w-6 sm:h-6" />
 								</button>
 							</div>
-							<div className="flex items-center gap-3">
+							<div className="flex items-center gap-2 sm:gap-3">
 								{tracks.length > 0 && (
 									<div ref={sortMenuRef} className="relative">
 										<button
@@ -350,11 +351,11 @@ export const PlaylistPage = observer(() => {
 											onClick={() =>
 												setSortMenuOpen(prev => !prev)
 											}
-										className="flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 text-sm text-white/80 hover:bg-white/20 transition-colors"
+										className="flex items-center gap-2 rounded-full bg-white/10 px-3 py-2 text-sm text-white/80 transition-colors hover:bg-white/20 sm:px-4 sm:py-2.5"
 										title={t('playlist.sortTitle')}
 									>
 										<ListOrdered size={18} />
-										<span>{t('playlist.sort')}</span>
+										<span className="hidden sm:inline">{t('playlist.sort')}</span>
 									</button>
 										{sortMenuOpen &&
 											sortMenuPosition &&
@@ -409,11 +410,11 @@ export const PlaylistPage = observer(() => {
 										onClick={() =>
 											setOptionsMenuOpen(prev => !prev)
 										}
-								className="flex items-center justify-center rounded-full bg-white/10 p-2.5 text-white/80 hover:bg-white/20 transition-colors"
+								className="flex items-center justify-center rounded-full bg-white/10 p-2 text-white/80 transition-colors hover:bg-white/20 sm:p-2.5"
 								title={t('playlist.playlistOptions')}
 								aria-label={t('playlist.playlistOptions')}
 									>
-										<MoreHorizontal size={20} />
+										<MoreHorizontal size={18} className="sm:w-5 sm:h-5" />
 									</button>
 									{optionsMenuOpen &&
 										optionsMenuPosition &&
@@ -481,20 +482,21 @@ export const PlaylistPage = observer(() => {
 
 		{/* Empty state */}
 		{tracks.length === 0 ? (
-			<div className="rounded-xl bg-white/5 border border-white/10 border-dashed py-16 px-6 text-center">
-				<p className="text-white/60 mb-2">{t('playlist.empty')}</p>
-				<p className="text-sm text-white/40 mb-6">
+			<div className="rounded-xl border border-dashed border-white/10 bg-white/5 px-4 py-12 text-center sm:px-6 sm:py-16">
+				<p className="mb-2 text-white/60">{t('playlist.empty')}</p>
+				<p className="mb-6 text-sm text-white/40">
 					{t('playlist.emptyDescription')}
 				</p>
 				<Link
 					to="/"
-					className="inline-flex items-center gap-2 rounded-full bg-white/10 px-5 py-2.5 hover:bg-white/20 transition-colors"
+					className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2.5 transition-colors hover:bg-white/20 sm:px-5"
 				>
 					<Home size={16} />
 					{t('playlist.findTracks')}
 				</Link>
 			</div>
 			) : (
+				<div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
 				<TrackTable
 						tracks={sortedTracks}
 						playlistName={playlist.name}
@@ -509,6 +511,7 @@ export const PlaylistPage = observer(() => {
 								: undefined
 						}
 				/>
+				</div>
 			)}
 		</PageContainer>
 	)

@@ -22,6 +22,8 @@ interface Props {
 	explicit?: boolean
 	track?: ITrack
 	trackList?: ITrack[]
+	/** Compact mode for player bar on mobile */
+	compact?: boolean
 }
 
 export const TrackInfo = observer(function TrackInfo({
@@ -32,7 +34,8 @@ export const TrackInfo = observer(function TrackInfo({
 	image,
 	explicit,
 	track,
-	trackList
+	trackList,
+	compact
 }: Props) {
 	const isActive = playerStore.currentTrack?.name === track?.name
 
@@ -53,11 +56,14 @@ export const TrackInfo = observer(function TrackInfo({
 	}
 
 	return (
-		<div className="flex items-center gap-3">
+		<div className={cn('flex items-center gap-3', compact && 'gap-2')}>
 			{track ? (
 				<button
 					onClick={handleSetTrack}
-					className="group relative flex h-12 w-12 shrink-0 items-center justify-center"
+					className={cn(
+						'group relative shrink-0 items-center justify-center',
+						compact ? 'flex h-10 w-10 sm:h-12 sm:w-12' : 'flex h-12 w-12'
+					)}
 				>
 					{isActive && (
 						<CircularProgressbar
@@ -93,21 +99,28 @@ export const TrackInfo = observer(function TrackInfo({
 					<img
 						src={image}
 						alt={title}
-						className="h-12 w-12 rounded-full object-cover"
+						className={cn(
+							'rounded-full object-cover',
+							compact ? 'h-10 w-10 sm:h-12 sm:w-12' : 'h-12 w-12'
+						)}
 					/>
 				</button>
 			) : (
 				<img
 					src={image}
 					alt={title}
-					className="w-12 h-12 rounded-full"
+					className={cn(
+						'rounded-full',
+						compact ? 'h-10 w-10 sm:h-12 sm:w-12' : 'h-12 w-12'
+					)}
 				/>
 			)}
 
 		<div className="min-w-0">
 			<div
 				className={cn(
-					'flex items-center gap-1.5 text-lg font-medium',
+					'flex items-center gap-1.5 font-medium',
+					compact ? 'text-sm sm:text-base' : 'text-lg',
 					isActive ? 'text-primary' : 'text-white'
 				)}
 			>
@@ -130,12 +143,22 @@ export const TrackInfo = observer(function TrackInfo({
 			{artistName ? (
 				<Link
 					to={PagesConfig.ARTISTS(encodeURIComponent(artistName))}
-					className="truncate block text-sm text-white/60 hover:underline hover:text-white"
+					className={cn(
+						'truncate block text-white/60 hover:underline hover:text-white',
+						compact ? 'text-xs sm:text-sm' : 'text-sm'
+					)}
 				>
 					{subTitle}
 				</Link>
 			) : (
-				<div className="truncate text-sm text-white/60">{subTitle}</div>
+				<div
+					className={cn(
+						'truncate text-white/60',
+						compact ? 'text-xs sm:text-sm' : 'text-sm'
+					)}
+				>
+					{subTitle}
+				</div>
 			)}
 		</div>
 		</div>

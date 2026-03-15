@@ -68,7 +68,7 @@ function TopResultCard({
 					onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
 				/>
 				<div>
-					<div className="text-2xl font-bold leading-tight">{artist.name}</div>
+					<div className="text-xl font-bold leading-tight">{artist.name}</div>
 					<div className="mt-1 text-sm text-white/50">{t('artist.type')}</div>
 				</div>
 				<button
@@ -99,7 +99,7 @@ function TopResultCard({
 				/>
 				<div>
 					<div className="flex items-center gap-2">
-						<span className="text-2xl font-bold leading-tight">{track.name}</span>
+						<span className="text-xl font-bold leading-tight">{track.name}</span>
 						{track.explicit && <ExplicitBadge />}
 					</div>
 					<div className="mt-1 text-sm text-white/50">
@@ -326,7 +326,7 @@ export const SearchPage = observer(function SearchPage() {
 						<Search size={36} className="text-white/30" />
 					</div>
 					<div>
-						<p className="text-xl font-bold">{t('search.emptyTitle')}</p>
+						<p className="text-lg font-bold">{t('search.emptyTitle')}</p>
 						<p className="mt-1 text-sm text-white/50">{t('search.emptySubtitle')}</p>
 					</div>
 				</div>
@@ -337,7 +337,7 @@ export const SearchPage = observer(function SearchPage() {
 				<div className="flex flex-col items-center gap-4 py-24 text-center">
 					<Music size={48} className="text-white/20" />
 					<div>
-						<p className="text-xl font-bold">{t('search.noResults', { query })}</p>
+						<p className="text-lg font-bold">{t('search.noResults', { query })}</p>
 						<p className="mt-1 text-sm text-white/50">{t('search.noResultsHint')}</p>
 					</div>
 				</div>
@@ -351,7 +351,7 @@ export const SearchPage = observer(function SearchPage() {
 						{/* Top result */}
 						{(topArtist || topTrack) && (
 							<div className="flex flex-col gap-3">
-								<h2 className="text-xl font-bold">{t('search.topResult')}</h2>
+								<h2 className="text-lg font-bold">{t('search.topResult')}</h2>
 								<TopResultCard
 									artist={topArtist ?? undefined}
 									track={topTrack ?? undefined}
@@ -364,7 +364,7 @@ export const SearchPage = observer(function SearchPage() {
 						{songsQueue.length > 0 && (
 							<div className="flex min-w-0 flex-col gap-3">
 								<div className="flex items-center justify-between">
-									<h2 className="text-xl font-bold">{t('search.songs')}</h2>
+									<h2 className="text-lg font-bold">{t('search.songs')}</h2>
 									<Clock size={14} className="text-white/30" />
 								</div>
 								<div className="flex flex-col">
@@ -385,7 +385,7 @@ export const SearchPage = observer(function SearchPage() {
 					{matchedArtists.length > 0 && (
 						<section>
 							<div className="mb-4 flex items-center justify-between">
-								<h2 className="text-xl font-bold">{t('search.artists')}</h2>
+								<h2 className="text-lg font-bold">{t('search.artists')}</h2>
 								<Mic2 size={16} className="text-white/30" />
 							</div>
 							<div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
@@ -423,7 +423,7 @@ export const SearchPage = observer(function SearchPage() {
 					{/* More songs (if > 5) */}
 					{rankedTracks.length > 5 && (
 						<section>
-							<h2 className="mb-4 text-xl font-bold">{t('search.allSongs')}</h2>
+							<h2 className="mb-4 text-lg font-bold">{t('search.allSongs')}</h2>
 							<div className="flex flex-col">
 								{rankedTracks.slice(5).map((track, i) => (
 									<SongRow

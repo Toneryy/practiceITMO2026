@@ -123,6 +123,122 @@ const MENU_WIDTH = 240
 const SUBMENU_WIDTH = 220
 const ICON_SIZE = 18
 
+// Mobile options modal — full-screen overlay with scrollable content
+function OptionsModal({
+	track,
+	playlistName,
+	inQueue,
+	onClose,
+	menuItemClass,
+	onAddToQueue,
+	onPlayNext,
+	onGoToArtist,
+	onGoToAlbum,
+	onShowLyrics,
+	onAddToPlaylist,
+	onViewDetails,
+	onRemoveFromPlaylist,
+	onShare,
+	onRemoveFromQueue,
+	ICON_SIZE: iconSize
+}: {
+	track: ITrack
+	playlistName?: string | null
+	inQueue?: boolean
+	onClose: () => void
+	menuItemClass: string
+	onAddToQueue: () => void
+	onPlayNext: () => void
+	onGoToArtist: () => void
+	onGoToAlbum: () => void
+	onShowLyrics: () => void
+	onAddToPlaylist: () => void
+	onViewDetails: () => void
+	onRemoveFromPlaylist?: () => void
+	onShare: () => void
+	onRemoveFromQueue?: () => void
+	ICON_SIZE: number
+}) {
+	useEffect(() => {
+		const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+		document.addEventListener('keydown', onKey)
+		return () => document.removeEventListener('keydown', onKey)
+	}, [onClose])
+
+	return createPortal(
+		<div
+			className="fixed inset-0 z-[9999] flex flex-col items-center justify-end bg-black/70 p-4 sm:justify-center"
+			onClick={onClose}
+			role="dialog"
+			aria-modal="true"
+		>
+			<div
+				className="fade-in flex w-full max-w-sm flex-col overflow-hidden rounded-t-2xl bg-[#282828] py-2 shadow-2xl sm:rounded-2xl sm:max-h-[85vh]"
+				onClick={e => e.stopPropagation()}
+			>
+				<div className="scrollbar-custom max-h-[70vh] overflow-y-auto py-1 sm:max-h-[60vh]">
+					<button className={menuItemClass} onClick={onAddToQueue}>
+						<ListMusic size={iconSize} className="shrink-0" />
+						Add to Queue
+					</button>
+					<button className={menuItemClass} onClick={onPlayNext}>
+						<Plus size={iconSize} className="shrink-0" />
+						Play Next
+					</button>
+					<div className="my-1 border-t border-white/10" />
+					<button className={menuItemClass} onClick={onGoToArtist}>
+						<User size={iconSize} className="shrink-0" />
+						Go to Artist
+					</button>
+					<button className={menuItemClass} onClick={onGoToAlbum}>
+						<Disc size={iconSize} className="shrink-0" />
+						Go to Album
+					</button>
+					<div className="my-1 border-t border-white/10" />
+					<button className={menuItemClass} onClick={onShowLyrics}>
+						<Quote size={iconSize} className="shrink-0" />
+						Show Lyrics
+					</button>
+					<div className="my-1 border-t border-white/10" />
+					<button className={menuItemClass} onClick={onAddToPlaylist}>
+						<Plus size={iconSize} className="shrink-0" />
+						Add to Playlist
+					</button>
+					<div className="my-1 border-t border-white/10" />
+					<button className={menuItemClass} onClick={onViewDetails}>
+						<Info size={iconSize} className="shrink-0" />
+						View details
+					</button>
+					{playlistName && onRemoveFromPlaylist && (
+						<>
+							<div className="my-1 border-t border-white/10" />
+							<button className={cn(menuItemClass, 'text-red-400 hover:bg-red-500/10')} onClick={onRemoveFromPlaylist}>
+								<Trash2 size={iconSize} className="shrink-0" />
+								Remove from playlist
+							</button>
+						</>
+					)}
+					<div className="my-1 border-t border-white/10" />
+					<button className={menuItemClass} onClick={onShare}>
+						<Share2 size={iconSize} className="shrink-0" />
+						Share
+					</button>
+					{inQueue && onRemoveFromQueue && (
+						<>
+							<div className="my-1 border-t border-white/10" />
+							<button className={cn(menuItemClass, 'text-red-400 hover:bg-red-500/10')} onClick={onRemoveFromQueue}>
+								<Trash2 size={iconSize} className="shrink-0" />
+								Remove from queue
+							</button>
+						</>
+					)}
+				</div>
+			</div>
+		</div>,
+		document.body
+	)
+}
+
 interface Props {
 	track: ITrack
 	playlistName?: string | null
@@ -139,11 +255,41 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 	const [playlistSearch, setPlaylistSearch] = useState('')
 	const [detailsOpen, setDetailsOpen] = useState(false)
 	const [submenuPos, setSubmenuPos] = useState<{ top: number; left: number } | null>(null)
+	const [menuPos, setMenuPos] = useState<{ top: number; right: number } | null>(null)
+	const [isMobile, setIsMobile] = useState(false)
+	const triggerRef = useRef<HTMLButtonElement>(null)
+	const menuPortalRef = useRef<HTMLDivElement>(null)
 	const menuRef = useRef<HTMLDivElement>(null)
 	const submenuRef = useRef<HTMLDivElement | null>(null)
 	const submenuTriggerRef = useRef<HTMLDivElement>(null)
 	const submenuTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 	const navigate = useNavigate()
+
+	// Mobile detection (sm: 640px)
+	useEffect(() => {
+		const mq = window.matchMedia('(max-width: 639px)')
+		setIsMobile(mq.matches)
+		const handler = () => setIsMobile(mq.matches)
+		mq.addEventListener('change', handler)
+		return () => mq.removeEventListener('change', handler)
+	}, [])
+
+	// Compute main menu portal position (desktop)
+	useLayoutEffect(() => {
+		if (!open || isMobile || !triggerRef.current) return
+		const rect = triggerRef.current.getBoundingClientRect()
+		const top = rect.bottom + 4
+		const right = window.innerWidth - rect.right
+		setMenuPos({ top, right })
+	}, [open, isMobile])
+
+	// Lock body scroll when menu/modal open
+	useEffect(() => {
+		if (!open) return
+		const prev = document.body.style.overflow
+		document.body.style.overflow = 'hidden'
+		return () => { document.body.style.overflow = prev }
+	}, [open])
 
 	// Compute submenu portal position whenever it opens
 	useLayoutEffect(() => {
@@ -168,9 +314,10 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 		if (!open) return
 		const handleMouseDown = (e: MouseEvent) => {
 			const target = e.target as Node
-			const insideMenu = menuRef.current?.contains(target)
+			const insideTrigger = menuRef.current?.contains(target)
+			const insideMenu = menuPortalRef.current?.contains(target)
 			const insideSubmenu = submenuRef.current?.contains(target)
-			if (!insideMenu && !insideSubmenu) {
+			if (!insideTrigger && !insideMenu && !insideSubmenu) {
 				setOpen(false)
 				setAddToPlaylistOpen(false)
 				setPlaylistSearch('')
@@ -185,6 +332,7 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 		setAddToPlaylistOpen(false)
 		setPlaylistSearch('')
 		setSubmenuPos(null)
+		setMenuPos(null)
 	}
 
 	const handleShowLyrics = () => {
@@ -236,6 +384,7 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 		<>
 		<div className="relative" ref={menuRef}>
 			<button
+				ref={triggerRef}
 				type="button"
 				onClick={() => setOpen(prev => !prev)}
 				className="rounded-md p-1.5 text-white/40 transition-opacity hover:text-white"
@@ -244,10 +393,34 @@ export const TrackOptionsMenu = observer(function TrackOptionsMenu({
 				<MoreHorizontal size={20} />
 			</button>
 
-			{open && (
+			{/* Mobile: modal with options */}
+			{open && isMobile && (
+				<OptionsModal
+					track={track}
+					playlistName={playlistName}
+					inQueue={inQueue}
+					onClose={close}
+					menuItemClass={menuItemClass}
+					ICON_SIZE={ICON_SIZE}
+					onAddToQueue={() => { playerStore.addToQueue(track); toast('Added to queue', { icon: <ListMusic size={18} style={{ color: 'var(--color-primary)' }} /> }); close() }}
+					onPlayNext={() => { playerStore.playNext(track); toast('Will play next'); close() }}
+					onGoToArtist={() => { navigate(PagesConfig.ARTISTS(encodeURIComponent(track.artist.name))); close() }}
+					onGoToAlbum={() => { navigate(PagesConfig.ALBUMS(encodeURIComponent(track.album))); close() }}
+					onShowLyrics={handleShowLyrics}
+					onAddToPlaylist={() => { close(); /* simplified on mobile: open playlist picker could be added */ }}
+					onViewDetails={() => { setDetailsOpen(true); close() }}
+					onRemoveFromPlaylist={playlistName ? () => { playlistStore.toggleTrackInPlaylist(playlistName, track.name); close() } : undefined}
+					onShare={handleShare}
+					onRemoveFromQueue={inQueue ? () => { playerStore.removeFromQueue(track.name); close() } : undefined}
+				/>
+			)}
+
+			{/* Desktop: dropdown via portal (fixed, no page scroll) */}
+			{open && !isMobile && menuPos && createPortal(
 				<div
-					className="fade-in absolute right-0 top-full z-50 mt-1 rounded-md bg-[#282828] py-1.5 shadow-xl"
-					style={{ width: `${MENU_WIDTH}px` }}
+					ref={menuPortalRef}
+					className="fade-in fixed z-[9998] max-h-[min(70vh,400px)] overflow-y-auto rounded-md bg-[#282828] py-1.5 shadow-xl"
+					style={{ width: MENU_WIDTH, top: menuPos.top, right: menuPos.right }}
 				>
 					{/* Section 1: Queue */}
 					<div className="px-1">
